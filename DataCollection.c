@@ -17,6 +17,7 @@ namespace Test
         public string MainTableName;
         
         public Dictionary<string,DataCollectionTable> Tables = new Dictionary<string,DataCollectionTable>(); 
+        public DataCollectionTable MainTable;
         
         public DataCollection(string name,string rootDir)
         {
@@ -69,6 +70,10 @@ namespace Test
                         {
                             processingTableName = contents[1];
                             Tables[processingTableName] = new DataCollectionTable(processingTableName,RootDir+"\\"+processingTableName+".dc");
+                            if(processingTableName == MainTableNames)
+                            {
+                                MainTable = Tables[processingTableName];
+                            }
                         }
                         else if(contents[0] == "index")
                         {
@@ -76,15 +81,45 @@ namespace Test
                         }
                         else if(contents[0] == "type")
                         {
-                            //
+                            var buff = contents[1].Split(',');
+                            if(Tables[processingTableName].Index.Count != buff.Length)
+                            {
+                                Error += $"{processingTableName}テーブルのtypeリストの要素数:{buff.Length}は不正な値です。\r\n";
+                                return false;
+                            }
+                            
+                            for(int i = 0; i < Tables[processingTableName].Index.Count ; i++)
+                            {
+                                Tables[processingTableName].Type[Tables[processingTableName].Index[i]] = buff[i];
+                            }
                         }
                         else if(contents[0] == "empty")
                         {
-                            //
+                            var buff = contents[1].Split(',');
+                            if(Tables[processingTableName].Index.Count != buff.Length)
+                            {
+                                Error += $"{processingTableName}テーブルのemptyリストの要素数:{buff.Length}は不正な値です。\r\n";
+                                return false;
+                            }
+                            
+                            for(int i = 0; i < Tables[processingTableName].Index.Count ; i++)
+                            {
+                                Tables[processingTableName].Empty[Tables[processingTableName].Index[i]] = buff[i];
+                            }
                         }
                         else if(contents[0] == "alias")
                         {
-                            //
+                            var buff = contents[1].Split(',');
+                            if(Tables[processingTableName].Index.Count != buff.Length)
+                            {
+                                Error += $"{processingTableName}テーブルのaliasリストの要素数:{buff.Length}は不正な値です。\r\n";
+                                return false;
+                            }
+                            
+                            for(int i = 0; i < Tables[processingTableName].Index.Count ; i++)
+                            {
+                                Tables[processingTableName].Alias[Tables[processingTableName].Index[i]] = buff[i];
+                            }
                         }
                         else if(contents[0] == "primaryKey")
                         {
@@ -105,12 +140,12 @@ namespace Test
             }
         }
         
-        public bool CreateTable()
+        public bool GetTableData()
         {
             foreach(string tblName in TableNames)
             {
-                string dcPath = RootDir + "\\" + tblName + ".dc";
-                
+                if(!Tables[tblName].){
+                }
             }
         }
     }  
