@@ -24,6 +24,11 @@ namespace Test
             Name = name;
             RootDir = rootDir;
             InfoPath = rootDir + "\\" + name + ".info";
+            
+            if(GetInfo())
+            {
+                GetData();
+            }
         }
         
         public bool GetInfo()
@@ -142,12 +147,14 @@ namespace Test
         
         public bool GetTableData()
         {
+            Error = $"データ取得エラー:DataCollection.GetData()\r\n";
             foreach(string tblName in TableNames)
             {
-                if(!Tables[tblName].){
+                if(!Tables[tblName].GetData){
+                    Error += Tables[tblName].Error;
+                    return false;
                 }
             }
         }
-    }  
-    
+    }    
 }
