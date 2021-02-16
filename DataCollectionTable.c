@@ -29,6 +29,29 @@ namespace Test
             //createTable();
         }
         
+        private bool validate(Dictionary<string,string> newData,string mode="regist"){
+            error = $"{Name}テーブルデータ検証エラー:DataCollectionTable.validate()\r\n";
+            //データ数(registモードなら同一か？、editモードなら超えていないか)
+            
+            //管理番号(registモードのみ)
+            
+            //型、nullチェック
+        }
+        
+        //新規登録
+        public bool Regist(Dictionary<string,string> newData)
+        {
+            error = $"{Name}テーブルデータ登録エラー:DataCollectionTable.Regist()\r\n";
+            if(!validate(newData)){
+                Error = error + Error;
+                return false;
+            }
+            
+            Data.Add(newData);
+            Msg += $"管理番号：{newData[PrimaryKey]}のデータを新規登録しました。\r\n";
+            return true;
+        }
+        
         public bool GetData()
         {
             Error += $"テーブル作成エラー:DataCollectionTable.GetData()\r\n";
