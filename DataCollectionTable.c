@@ -22,14 +22,14 @@ namespace Test
         
         public List<Dictionay<string,string>> Data = new List<Dictionay<string,string>>();
         
-        public DataCollectionTable(string name,string dataPath,string[] index,string[] type,string[] empty,string[] alias,string primayKey)
+        public DataCollectionTable(string name,string dataPath)
         {
             Name = name;
             DataPath = dataPath;
             //createTable();
         }
         
-        private bool createTable(string[] index,string[] type,string[] empty,string[] alias,string primayKey)
+        private bool createTable()
         {
             Error += $"テーブル作成エラー:DataCollectionTable.createTable()\r\n";
             
@@ -39,34 +39,7 @@ namespace Test
                 Error += $"{Name}テーブルのデータファイル:{DataPath}が見つかりませんでした。\r\n";
                 return false;
             }
-            //index他、引数のリストの要素数が同一かチェック
-            if(!(index.Length == type.Length == empty.Length == alias.Length))
-            {
-                Error += $"{Name}テーブルの列・型・null許容・別名のリスト数が一致しません。\r\n";
-                return false;
-            }
-            
-            //primarykeyが空白もしくはindex配列に存在しない値でないかチェック
-            if(primaryKey == null || primaryKey == "" || (Array.IndexOf(index,primaryKey) == -1))
-            {
-                Error += $"{Name}テーブルのprimarykey:{primaryKey}は不正な値です。\r\n";
-                return false;
-            }
-            
-            //Indexリストを作成
-            Index = index.ToList();
-            
-            //PrimaryKeyを作成
-            PrimaryKey = primaryKey;
-            
-            //indexをキーとしempty,type,aliasのディクショナリを作成            
-            for(int i = 0 ; i < index.Length ; i++)
-            {
-                Type[index[i]] = type[i];
-                Empty[index[i]] = empty[i];
-                Alias[index[i]] = alias[i];
-            }
-            
+                        
             //データ読み込み
             try
             {            
@@ -78,15 +51,15 @@ namespace Test
                         Dictionary lineDict = new Dictionary<string,string>();
                         var buff = line.Split(',');
                     
-                        if(index.Length != buff.Length)
+                        if(Index.Count != buff.Length)
                         {
                             Error += $"{Name}テーブルのデータ数:{buff.Length}は不正な値です。\r\n";
                             return false;
                         }
                     
-                        for(int i = 0 ; i < index.Length ; i++)
+                        for(int i = 0 ; i < Index.Count ; i++)
                         {
-                            lineDict[index[i]] = buff[i];
+                            lineDict[Index[i]] = buff[i];
                         }
                     
                         Data.Add(lineDict);                    
