@@ -37,6 +37,40 @@ namespace Test
             
             try
             {
+                using(StreamReader sr = new StreamReader(InfoPath))
+                {
+                    string line;
+                    string processingTableName = "";
+                    while((line = sr.ReadLine()) != null)
+                    {
+                        var contents = line.Split(':');
+                        
+                        if(contents[0] == "tableNames")
+                        {
+                            TableNames = contents[1].Split(',').ToList();
+                        }
+                        else if(contents[0] == "relationalTableNames")
+                        {
+                            RelationalTableNames = contents[1].Split(',').ToList();
+                        }
+                        else if(contents[0] == "subTableNames")
+                        {
+                            SubTableNames = contents[1].Split(',').ToList();
+                        }
+                        else if(contents[0] == "mainTableName")
+                        {
+                            MainTableName = contents[1];
+                        }
+                        else if(contents[0] == "@tableInfo")
+                        {
+                            processingTableName = "";
+                        }
+                        else if(contents[0] == "@tableInfo")
+                        {
+                            processingTableName = "";
+                        }
+                    }
+                }
             }
             catch(Exception ex)
             {
