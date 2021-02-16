@@ -78,6 +78,18 @@ namespace Test
                         {
                             //
                         }
+                        else if(contents[0] == "empty")
+                        {
+                            //
+                        }
+                        else if(contents[0] == "alias")
+                        {
+                            //
+                        }
+                        else if(contents[0] == "primaryKey")
+                        {
+                            Tables[processingTableName].Primarykey = contents[1]; 
+                        }
                     }
                 }
             }
