@@ -65,10 +65,18 @@ namespace Test
                         {
                             processingTableName = "";
                         }
-                        else if(contents[0] == "@tableName")
+                        else if(contents[0] == "tableName")
                         {
                             processingTableName = contents[1];
-                            Tables[processingTableName] = new DataCollectionTable(processingTableName,);
+                            Tables[processingTableName] = new DataCollectionTable(processingTableName,RootDir+"\\"+processingTableName+".dc");
+                        }
+                        else if(contents[0] == "index")
+                        {
+                            Tables[processingTableName].Index = contents[1].Split(',').ToList();
+                        }
+                        else if(contents[0] == "type")
+                        {
+                            //
                         }
                     }
                 }
