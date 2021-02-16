@@ -59,6 +59,37 @@ namespace Test
             //型、nullチェック
         }
         
+        //検索
+        public List<Dictionary<string,string>> Search(List<string> idList,List<string> wordList,List<string,string> operandList,string andOr = "or")
+        {
+            error = $"データ検索エラー:DataCollectionTable.Search()\r\n";
+            
+            List<Dictionary<string,string>> result = new List<Dictionary<string,string>>();
+            
+            //引数の値を検証
+            foreach(string id in idList){
+                if(!Index.Contains(id)){
+                    Error += error + $"{Name}テーブルに列'{id}'は存在しません。\r\n";
+                    return null;
+                }
+            }
+            
+            List<string> ops = new List<string>{"=","like"}
+            foreach(string ope in operandList){
+                if(!ops.Contains(ope)){
+                    Error += error + $"比較記号'{ope}'は不正な値です。'='か'like'のみ有効です。\r\n";
+                    return null;
+                }
+            }
+            
+            if(andOr != "and" && andOr != "or" ){
+                Error += error + $"組み合わせ記号'{andOr}'は不正な値です。'and'か'or'のみ有効です。\r\n";
+                return null;
+            }
+            
+            //検索
+        }
+        
         //編集
         public bool Edit(string id, Dictionary<string,string> newData)
         {
