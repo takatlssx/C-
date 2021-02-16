@@ -88,6 +88,11 @@ namespace Test
                         }
                         else if(contents[0] == "primaryKey")
                         {
+                            if(contents[1] == null || contents[1] == "" || !Tables[processingTableName].Index.Contains(contents[1]))
+                            {
+                                Error += $"{processingTableName}テーブルのprimaryKey:{contents[1]}は不正な値です。\r\n";
+                                return false;
+                            }
                             Tables[processingTableName].Primarykey = contents[1]; 
                         }
                     }
