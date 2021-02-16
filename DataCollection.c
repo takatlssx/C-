@@ -16,7 +16,7 @@ namespace Test
         public List<string> SubTableNames;
         public string MainTableName;
         
-        public List<DataCollectionTable> Tables = new List<DataCollectionTable>(); 
+        public Dictionary<string,DataCollectionTable> Tables = new Dictionary<string,DataCollectionTable>(); 
         
         public DataCollection(string name,string rootDir)
         {
@@ -65,9 +65,10 @@ namespace Test
                         {
                             processingTableName = "";
                         }
-                        else if(contents[0] == "@tableInfo")
+                        else if(contents[0] == "@tableName")
                         {
-                            processingTableName = "";
+                            processingTableName = contents[1];
+                            Tables[processingTableName] = new DataCollectionTable(processingTableName,);
                         }
                     }
                 }
