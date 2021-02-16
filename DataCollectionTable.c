@@ -29,6 +29,27 @@ namespace Test
             //createTable();
         }
         
+        //データのインデックス番号取得
+        public int GetDataNumber(string indexName,string data)
+        {
+            int resInt = -1;
+            if(!Index.Contains(indexName))
+            {
+                Error +=$"DataCollectionTable.GetDataNumber()\r\n{Name}テーブルに列'{}'は存在しません。\r\n";
+                return resInt;
+            }
+            for(int i = 0 ; i < Data.Count ; i++)
+            {
+                if(Data[i][indexName] == data)
+                {
+                    resUnt = i;
+                    break;
+                }
+            }
+            return resInt;
+        }
+        
+        //検証（ヴァリデーション）
         private bool validate(Dictionary<string,string> newData,string mode="regist"){
             error = $"{Name}テーブルデータ検証エラー:DataCollectionTable.validate()\r\n";
             //データ数(registモードなら同一か？、editモードなら超えていないか)
@@ -36,6 +57,37 @@ namespace Test
             //管理番号(registモードのみ)
             
             //型、nullチェック
+        }
+        
+        //編集
+        public bool Edit(string id, Dictionary<string,string> newData)
+        {
+            error = $"{Name}テーブルデータ編集エラー:DataCollectionTable.Edit()\r\n";
+            Msg += $"{Name}テーブルの管理番号'{id}'のデータを変更しました。\r\n";
+            int indexNum = GetDataNumber(PrimaryKey,id);
+            if(indexNum == -1)
+            {
+                Error = error + Error;
+                return false;
+            }
+            if(!validate(newData,"edit")){
+                Error = error + Error;
+                return false;
+            }
+            //編集前のデータ
+            var oldData = new Dictionary<string,string>(Data[indexNum]);
+            
+            try{
+                foreach(string key in newData.Keys)
+                {
+                    Data[indexNum][key] = newData[key];
+                    Msg += $"    列'{key}'  {oldData[key]} → {newData[key]}\r\n";
+                }
+            }
+            catch(Exception ex){
+                Error += error + $"データの変更に失敗しました。\r\n{ex.ToString()}\r\n";
+            }            
+            return true;
         }
         
         //新規登録
