@@ -29,9 +29,9 @@ namespace Test
             //createTable();
         }
         
-        private bool createTable()
+        public bool GetData()
         {
-            Error += $"テーブル作成エラー:DataCollectionTable.createTable()\r\n";
+            Error += $"テーブル作成エラー:DataCollectionTable.GetData()\r\n";
             
             //DataPathチェック
             if(!File.Exists(DataPath))
