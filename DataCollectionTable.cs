@@ -118,9 +118,14 @@ namespace MovieDataBase
             List<Dictionary<string, string>> result = new List<Dictionary<string, string>>();
 
             //引数の値を検証
+            if(idList.Count != wordList.Count || idList.Count != operandList.Cont)
+            {
+                Error += error + $"検索条件に指定された、idList・wordList・operandListの数が一致しません。\r\n";
+                return null;
+            }
             foreach (string id in idList)
             {
-                if (!Index.Contains(id))
+                if (!Index.Contains(id) && id !="" && id != "全て")
                 {
                     Error += error + $"{Name}テーブルに列'{id}'は存在しません。\r\n";
                     return null;
@@ -143,8 +148,61 @@ namespace MovieDataBase
                 return null;
             }
 
-            return result;
+            
             //検索
+            for(int i = 0 ; i < Data.Count ; i++)
+            {
+                //条件の数のboolリスト、1行のデータに対し条件ごとにfalseかtrueか判定
+                List<bool> isMatchedList = new bool[idList.Count].ToList();
+                
+                for(int c = 0 ; c < idList.Count ; c++)
+                {
+                    //完全一致(=)かつ検索対象列が全ての場合
+                    if(operandList[c] == "=" && (idList[c] == "" || idList[c] == "全て"))
+                    {
+                        if(Data[i].Values.Contains(wordList[c]))
+                        {
+                            isMatchedList[c] = true;
+                        }
+                    }
+                    //完全一致(=)かつ検索対象列が指定されている場合
+                    else if(operandList[c] == "=" && idList[c] != "" && idList[c] != "全て")
+                    {
+                        if(Data[i][idList[c]] == wordList[c])
+                        {
+                            isMatchedList[c] = true;
+                        }
+                    }
+                    //部分一致(like)かつ検索対象列が全ての場合
+                    else if(operandList[c] == "like" && (idList[c] == "" || idList[c] == "全て"))
+                    {
+                        foreach(string val in Data[i].Values)
+                        {
+                            if(val.Contains(wordList[c]))
+                            {
+                                isMatchedList[c] = true;
+                                break;
+                            }
+                        }
+                    }
+                    //部分一致(like)かつ検索対象列が指定されている場合
+                    else if(operandList[c] == "like=" && idList[c] != "" && idList[c] != "全て")
+                    {
+                        if(Data[i][idList[c]].Contains(wordList[c]))
+                        {
+                            isMatchedList[c] = true;
+                        }
+                    }
+                }
+            }
+            
+            Msg = $"【検索結果】";
+            for(int i = 0 ; i < idList.Count ; i++)
+            {
+                Msg += $"検索条件{i} → 列'{idList[i]}' {operandList[i]} '{wordList[i]} '";
+            }
+            Msg += $"【{result.Count}件】";
+            return result;
         }
 
         //編集
