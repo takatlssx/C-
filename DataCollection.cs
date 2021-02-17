@@ -35,6 +35,42 @@ namespace MovieDataBase
                 GetTableData();
             }
         }
+        
+        public bool Regist(Dictionary<string,string> newData)
+        {
+            string error = "メインテーブルデータ登録エラー:DataCollection.Regist()\r\n";
+            
+            //メインテーブル登録
+            if(!MainTable.Regist(newData)){
+                Error = error + MainTable.Error;
+                return false;
+            }
+            
+            //リレーショナルテーブル処理
+            //１：リレーショナルテーブル名をループ
+            //２：新規データのテーブル名と同じ列のデータを/で分割（複数の場合は/で区切るルール）
+            //３：区切られたデータ毎に、そのデータが対象テーブルに含まれているかチェック
+            //４：含まれていなければ新規データとして登録
+            foreach(string rltbl in RelationalTableNames)
+            {
+                string[] words = newData[rltbl].Split('/');
+                foreach(string word in words)
+                {
+                    if(Tables[rltbl].GetDataNumber(rltbl,word) == -1)
+                    {
+                        Dictionary<string,string> nD = new Dictionary<string,string>();
+                        nD[Tables[rltbl].PrimaryKey] = "";
+                        nD[rltbl] = word;
+                        if(!Tables[rltbl].Regist(nD))
+                        {
+                            Error = error + Tables[rltbl].Error;
+                            return false;
+                        }
+                    }
+                }
+            }
+            return true;
+        }
 
         public bool GetInfo()
         {
