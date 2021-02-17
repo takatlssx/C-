@@ -108,6 +108,10 @@ namespace MovieDataBase
                 Error = error + $"新たなデータ数:{newData.Count}は、規定のデータ数:{Index.Count}と異なります。\r\n";
                 return false;
             }
+            else if(mode == "edit" && newData.Count > Index.Count){
+                Error = error + $"新たなデータ数:{newData.Count}は、規定のデータ数:{Index.Count}を超えています。\r\n";
+                return false;
+            }
             
             //新データのディクショナリキーがIndexと一致しているか？
             //またキーの重複は無いか？
@@ -129,6 +133,7 @@ namespace MovieDataBase
             
             
             //管理番号(registモードのみ)
+            
 
             //型、nullチェック
 
