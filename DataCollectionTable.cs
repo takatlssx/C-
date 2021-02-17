@@ -100,9 +100,34 @@ namespace MovieDataBase
         //検証（ヴァリデーション）（途中）
         private bool validate(Dictionary<string, string> newData, string mode = "regist")
         {
-            string error = $"{Name}テーブルデータ検証エラー:DataCollectionTable.validate()\r\n";
+            string error = $"{Name}テーブル データ検証エラー:DataCollectionTable.validate()\r\n";
+            
             //データ数(registモードなら同一か？、editモードなら超えていないか)
-
+            if(mode == "regist" && newData.Count != Index.Count)
+            {
+                Error = error + $"新たなデータ数:{newData.Count}は、規定のデータ数:{Index.Count}と異なります。\r\n";
+                return false;
+            }
+            
+            //新データのディクショナリキーがIndexと一致しているか？
+            //またキーの重複は無いか？
+            string tempKey = "";
+            foreach(string key in newData.Keys)
+            {
+                if(!Index.Contains(key))
+                {
+                    Error = error + $"新たなデータのキー:{key}はデータベースに存在しないキーです。\r\n";
+                    return false;
+                }
+                else if(key == tempKey)
+                {
+                    Error = error + $"新たなデータにおいてキー:{key}が重複しています。\r\n";
+                    return false;
+                }                
+                tempKey = key;
+            }
+            
+            
             //管理番号(registモードのみ)
 
             //型、nullチェック
