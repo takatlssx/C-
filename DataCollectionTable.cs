@@ -96,6 +96,24 @@ namespace MovieDataBase
             }
             return resInt;
         }
+        
+        public bool Update()
+        {
+            string error = "データ更新・保存エラー:DataCollectionTable.Update()\r\n";
+            string csvStr = "";
+            for(int i = 0 ; i < Data.Count ; i++)
+            {
+                try
+                {
+                    csvStr += String.Join(",",Data[i].Values) + "\r\n";
+                }
+                catch(Excepton ex)
+                {
+                    Error = error + $"{i}行目のデータをCSV文字列に変換できませんでした。\r\n{ex.ToString()}\r\n";
+                    return false;
+                }
+            }
+        }
 
         //検証（ヴァリデーション）（途中）
         private bool validate(Dictionary<string, string> newData, string mode = "regist")
