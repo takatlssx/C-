@@ -36,6 +36,33 @@ namespace MovieDataBase
             }
         }
         
+        public bool RebuildDataCollection()
+        {
+            string error = "データコレクション再構築エラー:DataCollection.RebuildDataCollection()\r\n";
+            
+            
+            
+            //メインテーブルの管理番号等更新
+            for(int i = 0 ; i < MainTable.Data.Count ; i++)
+            {
+                try
+                {
+                    Data[i][MainTable.PrimaryKey] = (i+!).ToString("000000");
+                }
+                catch(Exception ex)
+                {
+                    Error = error + $"{MainTableName}テーブルの{i}行目のデータ構築に失敗しました。\r\n{ex.ToString()}\r\n";
+                    return false;
+                }                
+            }
+            
+            //リレーショナルテーブル更新
+            //メインテーブルに無い項目は削除し管理番号を再割り振り
+            foreach(string rltbl in RelationalTableNames)
+            {
+            }
+        }
+        
         private bool updateRelationalTables(Dictionary<string,string> newData)
         {
             string error = "リレーショナルテーブル更新エラー:DataCollection.updateRelationalTable()\r\n";
