@@ -36,20 +36,14 @@ namespace MovieDataBase
             }
         }
         
-        public bool Regist(Dictionary<string,string> newData)
+        private bool updateRelationalTables(Dictionary<string,string> newData)
         {
-            string error = "メインテーブルデータ登録エラー:DataCollection.Regist()\r\n";
-            
-            //メインテーブル登録
-            if(!MainTable.Regist(newData)){
-                Error = error + MainTable.Error;
-                return false;
-            }
+            string error = "リレーショナルテーブル更新エラー:DataCollection.updateRelationalTable()\r\n";
             
             //リレーショナルテーブル処理
-            //１：リレーショナルテーブル名をループ
-            //２：新規データのテーブル名と同じ列のデータを/で分割（複数の場合は/で区切るルール）
-            //３：区切られたデータ毎に、そのデータが対象テーブルに含まれているかチェック
+            //１：リレーショナルテーブル名リストをループ
+            //２：新規データの、テーブル名と同名列データを、'/'で分割（複数の場合は/で区切るルール）
+            //３：２で分割したデータリスト毎に、そのデータが対象テーブルに含まれているかを、GetDataNumberメソッドでチェック
             //４：含まれていなければ新規データとして登録
             foreach(string rltbl in RelationalTableNames)
             {
@@ -68,6 +62,25 @@ namespace MovieDataBase
                         }
                     }
                 }
+            }
+            return true;
+        }
+        
+        //新規登録
+        public bool RegistData(Dictionary<string,string> newData)
+        {
+            string error = "メインテーブルデータ登録エラー:DataCollection.RegistData()\r\n";
+            
+            //メインテーブル登録
+            if(!MainTable.Regist(newData)){
+                Error = error + MainTable.Error;
+                return false;
+            }
+            
+            //リレーショナルテーブル処理
+            if(!updateRelationalTables(newData)){
+                Error = error + MainTable.Error;
+                return false;
             }
             return true;
         }
