@@ -36,6 +36,23 @@ namespace MovieDataBase
             }
         }
         
+        private int mySort(string colName){
+            Dictironary<string,int> dict = new Dictironary<string,int>();
+            foreach(Dictionary<string,string> data in MainTable.Data)
+            {
+                string [] buff = data[colName].Split('/');
+                foreach(string bf in buff){
+                    if(!dict.Keys.Contains(bf)){
+                       dict[bf] = 1;
+                    }
+                    else{
+                        dict[bf] += 1;
+                    }
+                }
+            }
+            var sortedDict = dict.OrderByDescending((x) => x.Value);
+            List<string> lst = sortedDict.Values.ToList();
+        }
         public bool RebuildDataCollection()
         {
             string error = "データコレクション再構築エラー:DataCollection.RebuildDataCollection()\r\n";
