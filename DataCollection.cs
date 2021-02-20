@@ -35,107 +35,14 @@ namespace MovieDataBase
                 GetTableData();
             }
         }
-        
-        private int mySort(string colName){
-            Dictironary<string,int> dict = new Dictironary<string,int>();
-            foreach(Dictionary<string,string> data in MainTable.Data)
-            {
-                string [] buff = data[colName].Split('/');
-                foreach(string bf in buff){
-                    if(!dict.Keys.Contains(bf)){
-                       dict[bf] = 1;
-                    }
-                    else{
-                        dict[bf] += 1;
-                    }
-                }
-            }
-            var sortedDict = dict.OrderByDescending((x) => x.Value);
-            List<string> lst = sortedDict.Values.ToList();
-        }
-        public bool RebuildDataCollection()
-        {
-            string error = "データコレクション再構築エラー:DataCollection.RebuildDataCollection()\r\n";
-            
-            
-            
-            //メインテーブルの管理番号等更新
-            for(int i = 0 ; i < MainTable.Data.Count ; i++)
-            {
-                try
-                {
-                    Data[i][MainTable.PrimaryKey] = (i+!).ToString("000000");
-                }
-                catch(Exception ex)
-                {
-                    Error = error + $"{MainTableName}テーブルの{i}行目のデータ構築に失敗しました。\r\n{ex.ToString()}\r\n";
-                    return false;
-                }                
-            }
-            
-            //リレーショナルテーブル更新
-            //メインテーブルに無い項目は削除し管理番号を再割り振り
-            foreach(string rltbl in RelationalTableNames)
-            {
-            }
-        }
-        
-        private bool updateRelationalTables(Dictionary<string,string> newData)
-        {
-            string error = "リレーショナルテーブル更新エラー:DataCollection.updateRelationalTable()\r\n";
-            
-            //リレーショナルテーブル処理
-            //１：リレーショナルテーブル名リストをループ
-            //２：新規データの、テーブル名と同名列データを、'/'で分割（複数の場合は/で区切るルール）
-            //３：２で分割したデータリスト毎に、そのデータが対象テーブルに含まれているかを、GetDataNumberメソッドでチェック
-            //４：含まれていなければ新規データとして登録
-            foreach(string rltbl in RelationalTableNames)
-            {
-                string[] words = newData[rltbl].Split('/');
-                foreach(string word in words)
-                {
-                    if(Tables[rltbl].GetDataNumber(rltbl,word) == -1)
-                    {
-                        Dictionary<string,string> nD = new Dictionary<string,string>();
-                        nD[Tables[rltbl].PrimaryKey] = "";
-                        nD[rltbl] = word;
-                        if(!Tables[rltbl].Regist(nD))
-                        {
-                            Error = error + Tables[rltbl].Error;
-                            return false;
-                        }
-                    }
-                }
-            }
-            return true;
-        }
-        
-        //新規登録
-        public bool RegistData(Dictionary<string,string> newData)
-        {
-            string error = "メインテーブルデータ登録エラー:DataCollection.RegistData()\r\n";
-            
-            //メインテーブル登録
-            if(!MainTable.Regist(newData)){
-                Error = error + MainTable.Error;
-                return false;
-            }
-            
-            //リレーショナルテーブル処理
-            if(!updateRelationalTables(newData)){
-                Error = error + MainTable.Error;
-                return false;
-            }
-            return true;
-        }
 
         public bool GetInfo()
         {
-            Error = $"設定取得エラー:DataCollection.GetInfo()\r\n";
+            string error = $"設定取得エラー:DataCollection.GetInfo()\r\n";
 
             if (!File.Exists(InfoPath))
             {
-                Error += $"infoファイル:{InfoPath}が見つかりませんでした。\r\n";
+                Error = error + $"infoファイル:{InfoPath}が見つかりませんでした。\r\n";
                 return false;
             }
 
@@ -238,7 +145,7 @@ namespace MovieDataBase
             }
             catch (Exception ex)
             {
-                Error += $"infoファイル読み込みに失敗しました。\r\n{ex.ToString()}\r\n";
+                Error = error + $"infoファイル読み込みに失敗しました。\r\n{ex.ToString()}\r\n";
                 return false;
             }
             return true;
@@ -246,16 +153,135 @@ namespace MovieDataBase
 
         public bool GetTableData()
         {
-            Error = $"データ取得エラー:DataCollection.GetData()\r\n";
+            string error = $"データ取得エラー:DataCollection.GetData()\r\n";
             foreach (string tblName in TableNames)
             {
                 if (!Tables[tblName].GetData())
                 {
-                    Error += Tables[tblName].Error;
+                    Error = error + Tables[tblName].Error;
                     return false;
                 }
             }
             return true;
+        }
+
+        //リレーショナルテーブルをメインテーブルの新規データをもとに更新
+        private bool updateRelationalTables(Dictionary<string, string> newData)
+        {
+            string error = "リレーショナルテーブル更新エラー:DataCollection.updateRelationalTable()\r\n";
+
+            //リレーショナルテーブル処理
+            //１：リレーショナルテーブル名リストをループ
+            //２：新規データの、テーブル名と同名列データを、'/'で分割（複数の場合は/で区切るルール）
+            //３：２で分割したデータリスト毎に、そのデータが対象テーブルに含まれているかを、GetDataNumberメソッドでチェック
+            //４：含まれていなければ新規データとして登録
+
+            //1
+            foreach (string rltbl in RelationalTableNames)
+            {
+                //2
+                string[] words = newData[rltbl].Split('/');
+                foreach (string word in words)
+                {
+                    //3:wordが新規単語かつ空白でない
+                    if (Tables[rltbl].GetDataNumber(rltbl, word) == -1 && word != "" && word != null)
+                    {
+                        Dictionary<string, string> nD = new Dictionary<string, string>();
+                        nD[Tables[rltbl].PrimaryKey] = "";
+                        nD[rltbl] = word;
+
+                        //4
+                        if (!Tables[rltbl].Regist(nD))
+                        {
+                            Error = error + Tables[rltbl].Error;
+                            return false;
+                        }
+                        Msg += Tables[rltbl].Msg;
+                    }
+                }
+            }
+            return true;
+        }
+
+        //新規登録処理
+        //メインテーブル登録→リレーショナルテーブル更新
+        public bool RegistData(Dictionary<string, string> newData)
+        {
+            string error = "テーブルデータ登録処理エラー:DataCollection.RegistData()\r\n";
+
+            //メインテーブル登録
+            if (!MainTable.Regist(newData))
+            {
+                Error = error + MainTable.Error;
+                return false;
+            }
+            Msg = MainTable.Msg;
+
+            //リレーショナルテーブル処理
+            if (!updateRelationalTables(newData))
+            {
+                Error = error + Error;
+                return false;
+            }
+
+            //全てのテーブルを更新
+            foreach (string tblName in TableNames)
+            {
+                if (!Tables[tblName].Update())
+                {
+                    Error = error + Tables[tblName].Error;
+                    return false;
+                }
+            }            
+            return true;
+        }
+
+        //編集処理
+        public bool EditData(List<string> idList, Dictionary<string, string> newData)
+        {
+            string error = "テーブルデータ編集処理エラー:DataCollection.EditData()\r\n";
+
+            //idListにリレーショナルテーブルが含まれているかのフラグ
+            bool isRltbl = false;
+            foreach (string key in newData.Keys)
+            {
+                if (RelationalTableNames.Contains(key))
+                {
+                    isRltbl = true;
+                }
+            }
+
+            //編集
+            foreach (string id in idList)
+            {
+                if (!MainTable.Edit(id,newData))
+                {
+                    Error = error + MainTable.Error;
+                    return false;
+                }                
+            }
+
+            //編集データにリレーショナルデータ列が含まれていれば更新
+            if (isRltbl)
+            {
+                if (!updateRelationalTables(newData))
+                {
+                    Error = error + Error;
+                    return false;
+                }
+            }
+
+            //全てのテーブルを更新
+            foreach (string tblName in TableNames)
+            {
+                if (!Tables[tblName].Update())
+                {
+                    Error = error + Tables[tblName].Error;
+                    return false;
+                }
+            }
+
+            return false;
         }
     }
 }
