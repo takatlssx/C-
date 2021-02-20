@@ -23,6 +23,7 @@ namespace MovieDataBase
 
         public List<Dictionary<string, string>> Data = new List<Dictionary<string, string>>();
 
+        //コンストラクタ
         public DataCollectionTable(string name, string dataPath)
         {
             Name = name;
@@ -33,12 +34,12 @@ namespace MovieDataBase
         //データ取得
         public bool GetData()
         {
-            Error += $"テーブル作成エラー:DataCollectionTable.GetData()\r\n";
+            string error = $"テーブル作成エラー:DataCollectionTable.GetData()\r\n";
 
             //DataPathチェック
             if (!File.Exists(DataPath))
             {
-                Error += $"{Name}テーブルのデータファイル:{DataPath}が見つかりませんでした。\r\n";
+                Error = error + $"{Name}テーブルのデータファイル:{DataPath}が見つかりませんでした。\r\n";
                 return false;
             }
 
@@ -55,7 +56,7 @@ namespace MovieDataBase
 
                         if (Index.Count != buff.Length)
                         {
-                            Error += $"{Name}テーブルのデータ数:{buff.Length}は不正な値です。\r\n";
+                            Error = error + $"{Name}テーブルのデータ数:{buff.Length}は不正な値です。\r\n";
                             return false;
                         }
 
@@ -70,7 +71,7 @@ namespace MovieDataBase
             }
             catch (Exception ex)
             {
-                Error += $"{Name}テーブルのデータ取得に失敗しました。\r\n{ex.ToString()}\r\n";
+                Error = error + $"{Name}テーブルのデータ取得に失敗しました。\r\n{ex.ToString()}\r\n";
                 return false;
             }
 
@@ -95,85 +96,100 @@ namespace MovieDataBase
                 }
             }
             return resInt;
-        }
-        
-        public bool Update()
-        {
-            string error = "データ更新・保存エラー:DataCollectionTable.Update()\r\n";
-            string csvStr = "";
-            for(int i = 0 ; i < Data.Count ; i++)
-            {
-                try
-                {
-                    csvStr += String.Join(",",Data[i].Values) + "\r\n";
-                }
-                catch(Excepton ex)
-                {
-                    Error = error + $"{i}行目のデータをCSV文字列に変換できませんでした。\r\n{ex.ToString()}\r\n";
-                    return false;
-                }
-            }
-        }
+        }        
 
-        //検証（ヴァリデーション）（途中）
+        //登録するデータを検証（ヴァリデーション）（途中）
         private bool validate(Dictionary<string, string> newData, string mode = "regist")
         {
-            string error = $"{Name}テーブル データ検証エラー:DataCollectionTable.validate()\r\n";
-            
+            string error = $"{Name}テーブル登録データ検証エラー:DataCollectionTable.validate()\r\n";
+
             //データ数(registモードなら同一か？、editモードなら超えていないか)
-            if(mode == "regist" && newData.Count != Index.Count)
+            if (mode == "regist" && newData.Count != Index.Count)
             {
                 Error = error + $"新たなデータ数:{newData.Count}は、規定のデータ数:{Index.Count}と異なります。\r\n";
                 return false;
             }
-            else if(mode == "edit" && newData.Count > Index.Count){
+            else if (mode == "edit" && newData.Count > Index.Count)
+            {
                 Error = error + $"新たなデータ数:{newData.Count}は、規定のデータ数:{Index.Count}を超えています。\r\n";
                 return false;
             }
-            
+
             //新データのディクショナリキーがIndexと一致しているか？
             //またキーの重複は無いか？
             string tempKey = "";
-            foreach(string key in newData.Keys)
+            foreach (string key in newData.Keys)
             {
-                if(!Index.Contains(key))
+                if (!Index.Contains(key))
                 {
                     Error = error + $"新たなデータのキー:{key}はデータベースに存在しないキーです。\r\n";
                     return false;
                 }
-                else if(key == tempKey)
+                else if (key == tempKey)
                 {
                     Error = error + $"新たなデータにおいてキー:{key}が重複しています。\r\n";
                     return false;
-                }                
+                }
                 tempKey = key;
             }
-            
-            
+
+
             //管理番号(registモードのみ)
-            
+            if (mode == "regist")
+            {
+                newData[PrimaryKey] = (Data.Count + 1).ToString("000000");
+            }
 
             //型、nullチェック
+            foreach (string idx in Index)
+            {
+                //型
+                int tryInt = 0;
+                if (Type[idx] == "int" && !int.TryParse(newData[idx],out tryInt))
+                {
+                    error += $"型エラー：{idx}列のデータは整数値を入力してください。\r\n";
+                    return false;
+                }
+                DateTime tryDate;
+                if (Type[idx] == "date" && !DateTime.TryParse(newData[idx], out tryDate))
+                {
+                    error += $"型エラー：{idx}列のデータは日付値(yyyy/MM/dd)を入力してください。\r\n";
+                    return false;
+                }
+
+                //null
+                if (Empty[idx] == "not_null" && (newData[idx] == "" || newData[idx] == null))
+                {
+                    error += $"NULLエラー：{idx}列のデータはNULL不許容です。何か値を入力してください。\r\n";
+                    return false;
+                }
+            }
+            if (error != $"{Name}テーブル登録データ検証エラー:DataCollectionTable.validate()\r\n")
+            {
+                Error += error;
+                return false;
+            }
 
             return true;
         }
 
-        //検索(途中)
+        //検索
         public List<Dictionary<string, string>> Search(List<string> idList, List<string> wordList, List<string> operandList, string andOr = "or")
         {
             string error = $"データ検索エラー:DataCollectionTable.Search()\r\n";
 
             List<Dictionary<string, string>> result = new List<Dictionary<string, string>>();
 
-            //引数の値を検証
-            if(idList.Count != wordList.Count || idList.Count != operandList.Cont)
+            if (idList.Count != wordList.Count || operandList.Count != idList.Count)
             {
-                Error += error + $"検索条件に指定された、idList・wordList・operandListの数が一致しません。\r\n";
+                Error += error + $"列・検索語句・比較記号のリスト数が一致しません。\r\n";
                 return null;
             }
+
+            //引数の値を検証
             foreach (string id in idList)
             {
-                if (!Index.Contains(id) && id !="" && id != "全て")
+                if (!Index.Contains(id) && id != "全て" && id != "")
                 {
                     Error += error + $"{Name}テーブルに列'{id}'は存在しません。\r\n";
                     return null;
@@ -196,37 +212,36 @@ namespace MovieDataBase
                 return null;
             }
 
-            
-            //検索
-            for(int i = 0 ; i < Data.Count ; i++)
+            // 検索
+            for (int i = 0; i < Data.Count; i++)
             {
                 //条件の数のboolリスト、1行のデータに対し条件ごとにfalseかtrueか判定
                 List<bool> isMatchedList = new bool[idList.Count].ToList();
-                
-                for(int c = 0 ; c < idList.Count ; c++)
+
+                for (int c = 0; c < idList.Count; c++)
                 {
                     //完全一致(=)かつ検索対象列が全ての場合
-                    if(operandList[c] == "=" && (idList[c] == "" || idList[c] == "全て"))
+                    if (operandList[c] == "=" && (idList[c] == "" || idList[c] == "全て"))
                     {
-                        if(Data[i].Values.Contains(wordList[c]))
+                        if (Data[i].Values.Contains(wordList[c]))
                         {
                             isMatchedList[c] = true;
                         }
                     }
                     //完全一致(=)かつ検索対象列が指定されている場合
-                    else if(operandList[c] == "=" && idList[c] != "" && idList[c] != "全て")
+                    else if (operandList[c] == "=" && idList[c] != "" && idList[c] != "全て")
                     {
-                        if(Data[i][idList[c]] == wordList[c])
+                        if (Data[i][idList[c]] == wordList[c])
                         {
                             isMatchedList[c] = true;
                         }
                     }
                     //部分一致(like)かつ検索対象列が全ての場合
-                    else if(operandList[c] == "like" && (idList[c] == "" || idList[c] == "全て"))
+                    else if (operandList[c] == "like" && (idList[c] == "" || idList[c] == "全て"))
                     {
-                        foreach(string val in Data[i].Values)
+                        foreach (string val in Data[i].Values)
                         {
-                            if(val.Contains(wordList[c]))
+                            if (val.Contains(wordList[c]))
                             {
                                 isMatchedList[c] = true;
                                 break;
@@ -234,22 +249,28 @@ namespace MovieDataBase
                         }
                     }
                     //部分一致(like)かつ検索対象列が指定されている場合
-                    else if(operandList[c] == "like=" && idList[c] != "" && idList[c] != "全て")
+                    else if (operandList[c] == "like" && idList[c] != "" && idList[c] != "全て")
                     {
-                        if(Data[i][idList[c]].Contains(wordList[c]))
+                        if (Data[i][idList[c]].Contains(wordList[c]))
                         {
                             isMatchedList[c] = true;
                         }
                     }
                 }
+
+                if ((andOr == "and" && !isMatchedList.Contains(false)) || (andOr == "or" && isMatchedList.Contains(true)))
+                {
+                    result.Add(Data[i]);
+                }
             }
-            
+
             Msg = $"【検索結果】";
-            for(int i = 0 ; i < idList.Count ; i++)
+            for (int i = 0; i < idList.Count; i++)
             {
-                Msg += $"検索条件{i} → 列'{idList[i]}' {operandList[i]} '{wordList[i]} '";
+                Msg += $"検索条件{i+1} → 列'{idList[i]}' = '{wordList[i]} '";
             }
             Msg += $"【{result.Count}件】";
+
             return result;
         }
 
@@ -257,7 +278,9 @@ namespace MovieDataBase
         public bool Edit(string id, Dictionary<string, string> newData)
         {
             string error = $"{Name}テーブルデータ編集エラー:DataCollectionTable.Edit()\r\n";
+
             Msg += $"{Name}テーブルの管理番号'{id}'のデータを変更しました。\r\n";
+
             int indexNum = GetDataNumber(PrimaryKey, id);
             if (indexNum == -1)
             {
@@ -283,6 +306,7 @@ namespace MovieDataBase
             catch (Exception ex)
             {
                 Error += error + $"データの変更に失敗しました。\r\n{ex.ToString()}\r\n";
+                return false;
             }
             return true;
         }
@@ -291,17 +315,102 @@ namespace MovieDataBase
         public bool Regist(Dictionary<string, string> newData)
         {
             string error = $"{Name}テーブルデータ登録エラー:DataCollectionTable.Regist()\r\n";
+
             if (!validate(newData))
             {
                 Error = error + Error;
                 return false;
             }
 
-            Data.Add(newData);
-            Msg += $"管理番号：{newData[PrimaryKey]}のデータを新規登録しました。\r\n";
+            try
+            {
+                Data.Add(newData);
+            }
+            catch (Exception ex)
+            {
+                Error += error + $"データの追加に失敗しました。\r\n{ex.ToString()}\r\n";
+                return false;
+            }
+            
+            Msg = $"{Name}テーブルに、管理番号：{newData[PrimaryKey]}のデータを新規登録しました。\r\n";
             return true;
         }
 
-        
+        //データ書き出し保存
+        public bool Update()
+        {
+            string error = $"{Name}テーブルデータ保存エラー：DataCollectionTable.Update()\r\n";
+
+            //DataPathのパスチェック
+            if (!File.Exists(DataPath))
+            {
+                Error = error + $"データファイル:{DataPath}は存在しません。\r\n";
+                return false;
+            }
+
+            using (StreamWriter sw = new StreamWriter(DataPath))
+            {
+                string csvStr = "";
+                for (int i = 0; i< Data.Count;i++)
+                {
+                    try
+                    {
+                        csvStr += String.Join(",", Data[i].Values) + "\r\n";
+                    }
+                    catch (Exception ex)
+                    {
+                        Error = error + $"{i}行目のデータをCSV文字列に変換できませんでした。\r\n";
+                        return false;
+                    }                    
+                }
+
+                try
+                {
+                    sw.Write(csvStr);
+                }
+                catch (Exception ex)
+                {
+                    Error = error + $"データをファイルに書き込みできませんでした。\r\n";
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        //ソート
+        public List<Dictionary<string, string>> Sort(string index,string order = "asc")
+        {
+            List<Dictionary<string, string>> sortedData = new List<Dictionary<string, string>>(Data);
+
+            Msg += $"基準列'{Alias[index]}',ソート方式'{order}'で並び替え\r\n";
+
+            string error = "ソートエラー:DataCollectionTable.Sort()\r\n";
+
+            //引数の列名チェック
+            if (!Index.Contains(index))
+            {
+                Error = error + $"{Name}テーブルに列'{index}'は存在しません。\r\n";
+                return null;
+            }
+            //引数のソート方式名チェック( asc or desc )
+            if (order != "asc" && order != "desc") 
+            {
+                Error = error + $"ソート方式文字列は'asc(昇順)'か'desc(降順)'のみ有効です。\r\n";
+                return null;
+            }
+
+            //ソート
+            if(order == "asc")
+            {
+                sortedData.Sort((a, b) => a[index].CompareTo(b[index]));
+            }
+            else
+            {
+                sortedData.Sort((a, b) => b[index].CompareTo(a[index]));
+            }
+
+            return sortedData;
+        }
+
     }
 }
