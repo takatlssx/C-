@@ -169,6 +169,21 @@ namespace MovieDataBase
         private bool updateRelationalTables(Dictionary<string, string> newData)
         {
             string error = "リレーショナルテーブル更新エラー:DataCollection.updateRelationalTable()\r\n";
+            
+            //もし新規データにリレーショナルデータベース名の列が含まれていなければ処理を抜ける
+            bool isContainedRLTBL = false;
+            foreach(string key in newData.Keys)
+            {
+                if(RelationalTableNames.Contains(key))
+                {
+                    isContainedRLTBL = true;
+                    break;
+                }
+            }
+            if(!isContainedRLTBL)
+            {
+                return true;
+            }
 
             //リレーショナルテーブル処理
             //１：リレーショナルテーブル名リストをループ
@@ -241,16 +256,6 @@ namespace MovieDataBase
         {
             string error = "テーブルデータ編集処理エラー:DataCollection.EditData()\r\n";
 
-            //idListにリレーショナルテーブルが含まれているかのフラグ
-            bool isRltbl = false;
-            foreach (string key in newData.Keys)
-            {
-                if (RelationalTableNames.Contains(key))
-                {
-                    isRltbl = true;
-                }
-            }
-
             //編集
             foreach (string id in idList)
             {
@@ -261,14 +266,11 @@ namespace MovieDataBase
                 }                
             }
 
-            //編集データにリレーショナルデータ列が含まれていれば更新
-            if (isRltbl)
+            //リレーショナルデータ更新
+            if (!updateRelationalTables(newData))
             {
-                if (!updateRelationalTables(newData))
-                {
-                    Error = error + Error;
-                    return false;
-                }
+                Error = error + Error;
+                return false;
             }
 
             //全てのテーブルを更新
