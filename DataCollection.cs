@@ -283,7 +283,7 @@ namespace MovieDataBase
                 }
             }
 
-            return false;
+            return true;
         }
     }
 }
