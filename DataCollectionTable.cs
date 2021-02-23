@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 
-namespace MovieDataBase
+namespace Movie
 {
     public class DataCollectionTable
     {
@@ -24,6 +24,7 @@ namespace MovieDataBase
         public List<Dictionary<string, string>> Data = new List<Dictionary<string, string>>();
 
         //コンストラクタ
+        //テーブル名設定→データファイルパス設定
         public DataCollectionTable(string name, string dataPath)
         {
             Name = name;
@@ -31,15 +32,15 @@ namespace MovieDataBase
             //createTable();
         }
 
-        //データ取得
+        //テーブルデータ取得
         public bool GetData()
         {
-            string error = $"テーブル作成エラー:DataCollectionTable.GetData()\r\n";
+            string error = $"{Name}テーブル作成エラー:DataCollectionTable.GetData()\r\n";
 
-            //DataPathチェック
+            //DataPathチェック(.dcファイルのパス確認)
             if (!File.Exists(DataPath))
             {
-                Error = error + $"{Name}テーブルのデータファイル:{DataPath}が見つかりませんでした。\r\n";
+                Error = error + $"データファイル:{DataPath}が見つかりませんでした。\r\n";
                 return false;
             }
 
@@ -54,24 +55,26 @@ namespace MovieDataBase
                         Dictionary<string, string> lineDict = new Dictionary<string, string>();
                         var buff = line.Split(',');
 
+                        //もしテーブルの列の数と、読みこんだ1行(line)ををカンマで分割したデータ(buff)数が一致しなかったらエラー
                         if (Index.Count != buff.Length)
                         {
-                            Error = error + $"{Name}テーブルのデータ数:{buff.Length}は不正な値です。\r\n";
+                            Error = error + $"データ数:{buff.Length}は不正な値です。\r\n";
                             return false;
                         }
-
+                        //Indexとbuffから１行のデータディクショナリ(lineDict)を作成
                         for (int i = 0; i < Index.Count; i++)
                         {
                             lineDict[Index[i]] = buff[i];
                         }
 
+                        //データ追加
                         Data.Add(lineDict);
                     }
                 }
             }
             catch (Exception ex)
             {
-                Error = error + $"{Name}テーブルのデータ取得に失敗しました。\r\n{ex.ToString()}\r\n";
+                Error = error + $"データ取得に失敗しました。\r\n{ex.ToString()}\r\n";
                 return false;
             }
 
@@ -96,9 +99,9 @@ namespace MovieDataBase
                 }
             }
             return resInt;
-        }        
+        }
 
-        //登録するデータを検証（ヴァリデーション）（途中）
+        //登録するデータを検証（ヴァリデーション）
         private bool validate(Dictionary<string, string> newData, string mode = "regist")
         {
             string error = $"{Name}テーブル登録データ検証エラー:DataCollectionTable.validate()\r\n";
@@ -115,7 +118,7 @@ namespace MovieDataBase
                 return false;
             }
 
-            //新データのディクショナリキーがIndexと一致しているか？
+            //新データディクショナリのキーがIndexと一致しているか？
             //またキーの重複は無いか？
             string tempKey = "";
             foreach (string key in newData.Keys)
@@ -141,11 +144,11 @@ namespace MovieDataBase
             }
 
             //型、nullチェック
-            foreach (string idx in Index)
+            foreach (string idx in newData.Keys)
             {
                 //型
                 int tryInt = 0;
-                if (Type[idx] == "int" && !int.TryParse(newData[idx],out tryInt))
+                if (Type[idx] == "int" && !int.TryParse(newData[idx], out tryInt))
                 {
                     error += $"型エラー：{idx}列のデータは整数値を入力してください。\r\n";
                     return false;
@@ -170,6 +173,109 @@ namespace MovieDataBase
                 return false;
             }
 
+            return true;
+        }
+
+        //編集
+        public bool Edit(string id, Dictionary<string, string> newData)
+        {
+            string error = $"{Name}テーブルデータ編集エラー:DataCollectionTable.Edit()\r\n";
+
+            Msg += $"{Name}テーブルの管理番号'{id}'のデータを変更しました。\r\n";
+
+            int indexNum = GetDataNumber(PrimaryKey, id);
+            if (indexNum == -1)
+            {
+                Error = error + Error;
+                return false;
+            }
+            if (!validate(newData, "edit"))
+            {
+                Error = error + Error;
+                return false;
+            }
+            //編集前のデータ
+            var oldData = new Dictionary<string, string>(Data[indexNum]);
+
+            try
+            {
+                foreach (string key in newData.Keys)
+                {
+                    Data[indexNum][key] = newData[key];
+                    Msg += $"    列'{key}'  {oldData[key]} → {newData[key]}\r\n";
+                }
+            }
+            catch (Exception ex)
+            {
+                Error += error + $"データの変更に失敗しました。\r\n{ex.ToString()}\r\n";
+                return false;
+            }
+            return true;
+        }
+
+        //新規登録
+        public bool Regist(Dictionary<string, string> newData)
+        {
+            string error = $"{Name}テーブルデータ登録エラー:DataCollectionTable.Regist()\r\n";
+
+            if (!validate(newData))
+            {
+                Error = error + Error;
+                return false;
+            }
+
+            try
+            {
+                Data.Add(newData);
+            }
+            catch (Exception ex)
+            {
+                Error += error + $"データの追加に失敗しました。\r\n{ex.ToString()}\r\n";
+                return false;
+            }
+
+            Msg = $"{Name}テーブルに、管理番号：{newData[PrimaryKey]}のデータを新規登録しました。\r\n";
+            return true;
+        }
+
+        //データ保存（.dcファイルに書き出し）
+        public bool Update()
+        {
+            string error = $"{Name}テーブルデータ保存エラー：DataCollectionTable.Update()\r\n";
+
+            //DataPathのパスチェック
+            if (!File.Exists(DataPath))
+            {
+                Error = error + $"データファイル:{DataPath}は存在しません。\r\n";
+                return false;
+            }
+
+            using (StreamWriter sw = new StreamWriter(DataPath))
+            {
+                string csvStr = "";
+                for (int i = 0; i < Data.Count; i++)
+                {
+                    try
+                    {
+                        csvStr += String.Join(",", Data[i].Values) + "\r\n";
+                    }
+                    catch (Exception ex)
+                    {
+                        Error = error + $"{i}行目のデータをCSV文字列に変換できませんでした。\r\n";
+                        return false;
+                    }
+                }
+
+                try
+                {
+                    sw.Write(csvStr);
+                }
+                catch (Exception ex)
+                {
+                    Error = error + $"データをファイルに書き込みできませんでした。\r\n";
+                    return false;
+                }
+            }
             return true;
         }
 
@@ -267,118 +373,15 @@ namespace MovieDataBase
             Msg = $"【検索結果】";
             for (int i = 0; i < idList.Count; i++)
             {
-                Msg += $"検索条件{i+1} → 列'{idList[i]}' = '{wordList[i]} '";
+                Msg += $"検索条件{i + 1} → 列'{idList[i]}' = '{wordList[i]} '";
             }
             Msg += $"【{result.Count}件】";
 
             return result;
         }
 
-        //編集
-        public bool Edit(string id, Dictionary<string, string> newData)
-        {
-            string error = $"{Name}テーブルデータ編集エラー:DataCollectionTable.Edit()\r\n";
-
-            Msg += $"{Name}テーブルの管理番号'{id}'のデータを変更しました。\r\n";
-
-            int indexNum = GetDataNumber(PrimaryKey, id);
-            if (indexNum == -1)
-            {
-                Error = error + Error;
-                return false;
-            }
-            if (!validate(newData, "edit"))
-            {
-                Error = error + Error;
-                return false;
-            }
-            //編集前のデータ
-            var oldData = new Dictionary<string, string>(Data[indexNum]);
-
-            try
-            {
-                foreach (string key in newData.Keys)
-                {
-                    Data[indexNum][key] = newData[key];
-                    Msg += $"    列'{key}'  {oldData[key]} → {newData[key]}\r\n";
-                }
-            }
-            catch (Exception ex)
-            {
-                Error += error + $"データの変更に失敗しました。\r\n{ex.ToString()}\r\n";
-                return false;
-            }
-            return true;
-        }
-
-        //新規登録
-        public bool Regist(Dictionary<string, string> newData)
-        {
-            string error = $"{Name}テーブルデータ登録エラー:DataCollectionTable.Regist()\r\n";
-
-            if (!validate(newData))
-            {
-                Error = error + Error;
-                return false;
-            }
-
-            try
-            {
-                Data.Add(newData);
-            }
-            catch (Exception ex)
-            {
-                Error += error + $"データの追加に失敗しました。\r\n{ex.ToString()}\r\n";
-                return false;
-            }
-            
-            Msg = $"{Name}テーブルに、管理番号：{newData[PrimaryKey]}のデータを新規登録しました。\r\n";
-            return true;
-        }
-
-        //データ書き出し保存
-        public bool Update()
-        {
-            string error = $"{Name}テーブルデータ保存エラー：DataCollectionTable.Update()\r\n";
-
-            //DataPathのパスチェック
-            if (!File.Exists(DataPath))
-            {
-                Error = error + $"データファイル:{DataPath}は存在しません。\r\n";
-                return false;
-            }
-
-            using (StreamWriter sw = new StreamWriter(DataPath))
-            {
-                string csvStr = "";
-                for (int i = 0; i< Data.Count;i++)
-                {
-                    try
-                    {
-                        csvStr += String.Join(",", Data[i].Values) + "\r\n";
-                    }
-                    catch (Exception ex)
-                    {
-                        Error = error + $"{i}行目のデータをCSV文字列に変換できませんでした。\r\n";
-                        return false;
-                    }                    
-                }
-
-                try
-                {
-                    sw.Write(csvStr);
-                }
-                catch (Exception ex)
-                {
-                    Error = error + $"データをファイルに書き込みできませんでした。\r\n";
-                    return false;
-                }
-            }
-            return true;
-        }
-
         //ソート
-        public List<Dictionary<string, string>> Sort(string index,string order = "asc")
+        public List<Dictionary<string, string>> Sort(string index, string order = "asc")
         {
             List<Dictionary<string, string>> sortedData = new List<Dictionary<string, string>>(Data);
 
@@ -393,14 +396,14 @@ namespace MovieDataBase
                 return null;
             }
             //引数のソート方式名チェック( asc or desc )
-            if (order != "asc" && order != "desc") 
+            if (order != "asc" && order != "desc")
             {
                 Error = error + $"ソート方式文字列は'asc(昇順)'か'desc(降順)'のみ有効です。\r\n";
                 return null;
             }
 
             //ソート
-            if(order == "asc")
+            if (order == "asc")
             {
                 sortedData.Sort((a, b) => a[index].CompareTo(b[index]));
             }
