@@ -5,25 +5,47 @@ using System.Text;
 using System.Threading.Tasks;
 using System.IO;
 
-namespace MovieDataBase
+namespace Movie
 {
     public class DataCollection
     {
+        #region メンバー変数
+
+        //エラー文字列
         public string Error;
+        //メッセージ文字列
         public string Msg;
 
+        //データコレクションの名称
         public string Name;
+        //データコレクションのルートフォルダ→ドライブ:\ルートフォルダ
         public string RootDir;
+        //データコレクションの設定情報(.info)ファイルパス(RootDir\Name.info)
         public string InfoPath;
 
-        public List<string> TableNames;
-        public List<string> RelationalTableNames;
-        public List<string> SubTableNames;
-        public string MainTableName;
 
-        public Dictionary<string, DataCollectionTable> Tables = new Dictionary<string, DataCollectionTable>();
+        //テーブル名のList<string>
+        public List<string> TableNames;
+
+        //リレーショナルテーブル名のList<string>
+        public List<string> RelationalTableNames;
+
+        //サブテーブル名のList<string>
+        public List<string> SubTableNames;
+
+        //メインテーブル名
+        public string MainTableName;
+        //メインテーブルDataCollectionTableオブジェクト
         public DataCollectionTable MainTable;
 
+        //DataCollectionTableオブジェクトのディクショナリ
+        //キー：テーブル名、値：DataCollectionTableオブジェクト
+        public Dictionary<string, DataCollectionTable> Tables = new Dictionary<string, DataCollectionTable>();
+        #endregion
+
+        #region コンストラクタ
+        //コンストラクタ 引数：データコレクション名、ルートディレクトリパス
+        //GetInfo()で設定情報取得→GettableData()でテーブルデータ取得
         public DataCollection(string name, string rootDir)
         {
             Name = name;
@@ -35,11 +57,15 @@ namespace MovieDataBase
                 GetTableData();
             }
         }
+        #endregion
 
+        #region 初期化時実行メソッド(GetInfo() GetTableData())
+
+        //設定取得
         public bool GetInfo()
         {
             string error = $"設定取得エラー:DataCollection.GetInfo()\r\n";
-
+            //設定ファイルパスチェック
             if (!File.Exists(InfoPath))
             {
                 Error = error + $"infoファイル:{InfoPath}が見つかりませんでした。\r\n";
@@ -151,6 +177,8 @@ namespace MovieDataBase
             return true;
         }
 
+        //テーブルデータ取得
+        //テーブル名リストをループし、テーブルオブジェクト毎にそのGetData()メソッドでデータ取得
         public bool GetTableData()
         {
             string error = $"データ取得エラー:DataCollection.GetData()\r\n";
@@ -164,56 +192,64 @@ namespace MovieDataBase
             }
             return true;
         }
+        #endregion
 
         //リレーショナルテーブルをメインテーブルの新規データをもとに更新
         private bool updateRelationalTables(Dictionary<string, string> newData)
         {
             string error = "リレーショナルテーブル更新エラー:DataCollection.updateRelationalTable()\r\n";
-            
+
             //もし新規データにリレーショナルデータベース名の列が含まれていなければ処理を抜ける
-            bool isContainedRLTBL = false;
-            foreach(string key in newData.Keys)
+            bool isContainRLTBL = false;
+            foreach (string key in newData.Keys)
             {
-                if(RelationalTableNames.Contains(key))
+                if (RelationalTableNames.Contains(key))
                 {
-                    isContainedRLTBL = true;
+                    isContainRLTBL = true;
                     break;
                 }
             }
-            if(!isContainedRLTBL)
+            if (!isContainRLTBL)
             {
                 return true;
             }
 
             //リレーショナルテーブル処理
             //１：リレーショナルテーブル名リストをループ
-            //２：新規データの、テーブル名と同名列データを、'/'で分割（複数の場合は/で区切るルール）
-            //３：２で分割したデータリスト毎に、そのデータが対象テーブルに含まれているかを、GetDataNumberメソッドでチェック
+            //２：新規データにリレーショナルテーブル名の列が含まれていれば、テーブル名と同名列データを、'/'で分割（複数の場合は/で区切るルール）
+            //３：２で分割したデータリストをループし、word毎に、そのwordが対象テーブルに含まれているかを、GetDataNumberメソッドでチェック
             //４：含まれていなければ新規データとして登録
 
             //1
             foreach (string rltbl in RelationalTableNames)
             {
                 //2
-                string[] words = newData[rltbl].Split('/');
-                foreach (string word in words)
+                if (newData.Keys.Contains(rltbl))
                 {
-                    //3:wordが新規単語かつ空白でない
-                    if (Tables[rltbl].GetDataNumber(rltbl, word) == -1 && word != "" && word != null)
-                    {
-                        Dictionary<string, string> nD = new Dictionary<string, string>();
-                        nD[Tables[rltbl].PrimaryKey] = "";
-                        nD[rltbl] = word;
+                    //2
+                    string[] words = newData[rltbl].Split('/');
 
-                        //4
-                        if (!Tables[rltbl].Regist(nD))
+                    //3
+                    foreach (string word in words)
+                    {
+                        //3:wordが新規単語かつ空白でない
+                        if (Tables[rltbl].GetDataNumber(rltbl, word) == -1 && word != "" && word != null)
                         {
-                            Error = error + Tables[rltbl].Error;
-                            return false;
+                            Dictionary<string, string> nD = new Dictionary<string, string>();
+                            nD[Tables[rltbl].PrimaryKey] = "";
+                            nD[rltbl] = word;
+
+                            //4
+                            if (!Tables[rltbl].Regist(nD))
+                            {
+                                Error = error + Tables[rltbl].Error;
+                                return false;
+                            }
+                            Msg += Tables[rltbl].Msg;
                         }
-                        Msg += Tables[rltbl].Msg;
                     }
                 }
+
             }
             return true;
         }
@@ -247,7 +283,7 @@ namespace MovieDataBase
                     Error = error + Tables[tblName].Error;
                     return false;
                 }
-            }            
+            }
             return true;
         }
 
@@ -259,14 +295,18 @@ namespace MovieDataBase
             //編集
             foreach (string id in idList)
             {
-                if (!MainTable.Edit(id,newData))
+                if (!MainTable.Edit(id, newData))
                 {
                     Error = error + MainTable.Error;
                     return false;
-                }                
+                }
+            }
+            Msg = $"{MainTableName}テーブルで{idList.Count}件のデータを以下の通り変更しました。\r\n";
+            foreach (string ky in newData.Keys)
+            {
+                Msg += $"{ky}列 = '{newData[ky]}'\r\n";
             }
 
-            //リレーショナルデータ更新
             if (!updateRelationalTables(newData))
             {
                 Error = error + Error;
@@ -284,6 +324,16 @@ namespace MovieDataBase
             }
 
             return true;
+        }
+
+        //メインテーブル検索
+        public List<Dictionary<string, string>> SearchData(List<string> idList, List<string> wordList, List<string> operandList, string andOr = "or")
+        {
+            if (MainTable.Search(idList, wordList, operandList, andOr) == null)
+            {
+                Error = MainTable.Error;
+            }
+            return MainTable.Search(idList, wordList, operandList, andOr);
         }
     }
 }
