@@ -9,10 +9,8 @@ namespace MovieDataBase
 {
     public class DataCollection
     {
-        public bool RegistUnregisteredData()
+        public List<string> SearchUnRegisteredData()
         {
-            string error = $"データベース未登録ファイル自動登録エラー:DataCollection.RegistUnregisteredData()\r\n";
-            
             //データベースに登録されていないファイルパスを格納するリスト
             List<string> notExistsFileList = new List<string>();
             
@@ -32,16 +30,21 @@ namespace MovieDataBase
             }
             catch(Exception ex)
             {
-                Error = error + $"未登録ファイルの検索に失敗しました。\r\n{ex.ToString()}\r\n";
-                return false;
+                Msg = error + $"未登録ファイルの検索に失敗しました。\r\n{ex.ToString()}\r\n";
+                return new List<string>();
             }
             
-            //未登録ファイルが無ければ終了。
+            //未登録ファイルが無ければMsgに出す。
             if(notExistsFileList.Count == 0)
             {
                 Msg = $"データベースに登録されていないファイルはありませんでした。\r\n";
-                return true;
-            }
+            }           
+            
+            return notExistsFileList;
+        }
+        public bool RegistUnregisteredData(List<string> notExistsFileList)
+        {
+            string error = $"データベース未登録ファイル自動登録エラー:DataCollection.RegistUnregisteredData()\r\n";
             
             //未登録ファイルをループしデータベースのRegistメソッドで登録
             foreach(string fl in notExistsFileList)
