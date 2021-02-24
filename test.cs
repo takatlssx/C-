@@ -9,7 +9,76 @@ namespace MovieDataBase
 {
     public class DataCollection
     {
-        
+        public bool RegistUnregisteredData()
+        {
+            string error = $"データベース未登録ファイル自動登録エラー:DataCollection.RegistUnregisteredData()\r\n";
+            
+            //データベースに登録されていないファイルパスを格納するリスト
+            List<string> notExistsFileList = new List<string>();
+            
+            //G:\Movie内のファイルを取得
+            List<string> fList = Directory.GetFiles("G:\\Movie", "*", SearchOption.AllDirectories).ToList();
+            
+            //メインテーブルの列'file'に登録されていないファイルをnotExistsFileListに加える
+            try
+            {
+                foreach(string fl in fList)
+                {
+                    if(MainTable.GetDataNumber("file",fl) == -1)
+                    {
+                        notExistsFileList.Add(fl);
+                    }
+                }
+            }
+            catch(Exception ex)
+            {
+                Error = error + $"未登録ファイルの検索に失敗しました。\r\n{ex.ToString()}\r\n";
+                return false;
+            }
+            
+            //未登録ファイルが無ければ終了。
+            if(notExistsFileList.Count == 0)
+            {
+                Msg = $"データベースに登録されていないファイルはありませんでした。\r\n";
+                return true;
+            }
+            
+            //未登録ファイルをループしデータベースのRegistメソッドで登録
+            foreach(string fl in notExistsFileList)
+            {
+                Dictionary<string,string> newData = new Dictionary<string,string>();                
+                try
+                {
+                    newData["id"] = "";
+                    newData["title"] = Path.GetFileNameWithoutExtension(fl);
+                    newData["subtitle"] = Path.GetFileNameWithoutExtension(fl);
+                    newData["number"] = "0000";
+                    newData["category"] = fl.Split('\\')[2]:
+                    newData["tag"] = "";
+                    newData["series"] = "";
+                    newData["actor"] = "";
+                    newData["source"] = "";
+                    newData["date"] = new FileInfo(fl).LastWriteTime.ToString("yyyy/MM/dd");
+                    newData["file"] = fl;
+                    newData["rate"] = "0";
+                    newData["detail"] = "";
+                    
+                    if(!RegistData(newData))
+                    {
+                        Error = error + Error;
+                        return false;
+                    }
+                    
+                }
+                catch(Exception ex)
+                {
+                    Error = error + $"新規データ登録に失敗しました。\r\n{ex.ToString()}\r\n";
+                    return false;
+                }
+                
+            }
+            return true;
+        }
         public bool BackUp()
         {
             //コピー元のファイル一覧取得 
