@@ -126,7 +126,7 @@ namespace Movie
                                 Error += $"{processingTableName}テーブルのtypeリストの要素数:{buff.Length}は不正な値です。\r\n";
                                 return false;
                             }
-
+                            //Tables[processingTableName].Type = Index.Zip(buff,(ky,val) => new { ky,val }).ToDictionary(d => d.ky,d => d.val);        
                             for (int i = 0; i < Tables[processingTableName].Index.Count; i++)
                             {
                                 Tables[processingTableName].Type[Tables[processingTableName].Index[i]] = buff[i];
@@ -140,7 +140,7 @@ namespace Movie
                                 Error += $"{processingTableName}テーブルのemptyリストの要素数:{buff.Length}は不正な値です。\r\n";
                                 return false;
                             }
-
+                            //Tables[processingTableName].Empty = Index.Zip(buff,(ky,val) => new { ky,val }).ToDictionary(d => d.ky,d => d.val);        
                             for (int i = 0; i < Tables[processingTableName].Index.Count; i++)
                             {
                                 Tables[processingTableName].Empty[Tables[processingTableName].Index[i]] = buff[i];
@@ -156,7 +156,6 @@ namespace Movie
                             }
                             
                             //Tables[processingTableName].Alias = Index.Zip(buff,(ky,val) => new { ky,val }).ToDictionary(d => d.ky,d => d.val);
-
                             for (int i = 0; i < Tables[processingTableName].Index.Count; i++)
                             {
                                 Tables[processingTableName].Alias[Tables[processingTableName].Index[i]] = buff[i];
@@ -334,11 +333,12 @@ namespace Movie
         //メインテーブル検索
         public List<Dictionary<string, string>> SearchData(List<string> idList, List<string> wordList, List<string> operandList, string andOr = "or")
         {
-            if (MainTable.Search(idList, wordList, operandList, andOr) == null)
+            List<Dictionary<string, string>> result = MainTable.Search(idList, wordList, operandList, andOr);
+            if (result == null)
             {
                 Error = MainTable.Error;
             }
-            return MainTable.Search(idList, wordList, operandList, andOr);
+            return result;
         }
     }
 }
