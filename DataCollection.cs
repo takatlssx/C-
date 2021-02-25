@@ -20,7 +20,7 @@ namespace Movie
         public string Name;
         //データコレクションのルートフォルダ→ドライブ:\ルートフォルダ
         public string RootDir;
-        //データコレクションの設定情報(.info)ファイルパス(RootDir\Name.info)
+        //データコレクションの設定情報(.info)ファイルパス(RootDir\データコレクション名.info)
         public string InfoPath;
 
 
@@ -44,8 +44,9 @@ namespace Movie
         #endregion
 
         #region コンストラクタ
-        //コンストラクタ 引数：データコレクション名、ルートディレクトリパス
-        //GetInfo()で設定情報取得→GettableData()でテーブルデータ取得
+        //コンストラクタ
+        //引数：データコレクション名,ルートディレクトリパス
+        //GetInfo()で設定情報取得→GetTableData()でテーブルデータ取得
         public DataCollection(string name, string rootDir)
         {
             Name = name;
@@ -59,7 +60,7 @@ namespace Movie
         }
         #endregion
 
-        #region 初期化時実行メソッド(GetInfo() GetTableData())
+        #region 初期化時実行メソッド(GetInfo(),GetTableData())
 
         //設定取得
         public bool GetInfo()
@@ -76,7 +77,9 @@ namespace Movie
             {
                 using (StreamReader sr = new StreamReader(InfoPath))
                 {
+                    //1行分の文字列
                     string line;
+                    //現在処理中のテーブル名
                     string processingTableName = "";
                     while ((line = sr.ReadLine()) != null)
                     {
@@ -151,6 +154,8 @@ namespace Movie
                                 Error += $"{processingTableName}テーブルのaliasリストの要素数:{buff.Length}は不正な値です。\r\n";
                                 return false;
                             }
+                            
+                            //Tables[processingTableName].Alias = Index.Zip(buff,(ky,val) => new { ky,val }).ToDictionary(d => d.ky,d => d.val);
 
                             for (int i = 0; i < Tables[processingTableName].Index.Count; i++)
                             {
