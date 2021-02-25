@@ -62,6 +62,8 @@ namespace Movie
                             return false;
                         }
                         //Indexとbuffから１行のデータディクショナリ(lineDict)を作成
+                        //linedict = Index.Zip(buff,(ky,vl) => new {ky,vl}).ToDictionary(a => a.ky,a => a.vl);
+                        //Data.Add(Index.Zip(buff,(ky,vl) => new {ky,vl}).ToDictionary(a => a.ky,a => a.vl));
                         for (int i = 0; i < Index.Count; i++)
                         {
                             lineDict[Index[i]] = buff[i];
