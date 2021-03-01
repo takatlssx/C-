@@ -18,6 +18,30 @@ namespace MovieDataBase
         public List<string> searchOperandList = new List<string>();
         public string searchCombination = "or";
         
+        public void SetAllData(sortOrder = "asc")
+        {
+            SystemStatusLabel.Text = "データベース表示";
+            ViewingData = DC.MainTable.Data;
+            labeldGVStatus.Text = $"全件表示【{ViewingData.Count}件】";
+            
+             //listBox描画
+            listCategory.Items.Clear();
+            listCategory.Items.Add(new string[]{ "全て" }.Concat(DC.Tables["category"].Data.Select( x => x["category"])).ToArray());
+            listTag.Items.Clear();
+            listTag.Items.Add(new string[]{ "全て" }.Concat(DC.Tables["tag"].Data.Select( x => x["tag"])).ToArray());
+            listSeries.Items.Clear();
+            listSeries.Items.Add(new string[]{ "全て" }.Concat(DC.Tables["series"].Data.Select( x => x["series"])).ToArray());
+            
+            //dGV描画
+            dGV.Columns.Clear();
+            dGV.Rows.Clear();
+            
+            foreach(string val in DC.MainTable.Alias.Values)
+            {
+            }
+           
+        }
+        
         public void SetData(string dataFlg = "all",string sortOrder = "asc")
         {
             SystemStatusText = "データベース表示";
@@ -54,11 +78,8 @@ namespace MovieDataBase
             
             //listBox描画
             listCategory.Items.Clear();
-            listCategory.Items.Add("全て");
-            foreach(var dt in DC.Tables["category"].Data)
-            {
-                listCategory.Items.Add(dt["category"]);
-            }
+            listCategory.Items.Add(new string[]{ "全て" }.Concat(DC.Tables["category"].Data.Select( x => x["category"])).ToArray());
+            
             listTag.Items.Clear();
             listTag.Items.Add("全て");
             listSeries.Items.Clear();
@@ -66,15 +87,8 @@ namespace MovieDataBase
             
             if(ViewingData == null || dataFlg == "all")
             {
-                foreach(var dt in DC.Tables["tag"].Data)
-                {
-                    listTag.Items.Add(dt["tag"]);
-                }
-                foreach(var dt in DC.Tables["series"].Data)
-                {
-                    listSeries.Items.Add(dt["series"]);
-                }
-                
+                listTag.Items.Add(new string[]{ "全て" }.Concat(DC.Tables["tag"].Data.Select( x => x["tag"])).ToArray());
+                listSeries.Items.Add(new string[]{ "全て" }.Concat(DC.Tables["series"].Data.Select( x => x["series"])).ToArray());
             }
             else
             {
