@@ -7,25 +7,36 @@ namespace XX
         public string Error = "";
         public string Msg = "";
         
-        private string srcRootDir;
-        private string destRootDir;
+        string name;
+        string srcRootDir;
+        string destRootDir;
         
-        public Backup(string srcRootDir,string destRootDir)
+        public Backup(string name,string srcRootDir,string destRootDir)
         {
+            this.name = name;
+            this.srcRootDir = srcRootDir;
+            this.destRootDir = destRootDir;
         }
         
         public bool BackupAll()
         {
             string error = $"バックアップエラー:Backup.BackupAll()\r\n";
-            //パスチェック
+            
+            //バックアップ元フォルダのパスチェック
             if(!Directory.Exists(srcRootDir))
             {
+                Error = error + $"バクアップ元フォルダ:{srcRootDir}が見つかりませんでした。\r\n";
                 return false;
             }
             
+            //バックアップ先のルートフォルダを作成
             destRootDir += "\\" + DateTime.Now.ToString("yyyyMMddhhmmss"); 
+            if(!Directory.Exists(destRootDir))
+            {
+                Directory.CreateDirectory(destRootDir);
+            }
             
-            //ソース元フォルダのファイル一覧取得（FileInfo）
+            //ソース元フォルダのファイルインフォ一覧取得
             List<FileInfo> srcFileList = new DirectoryInfo(srcRootDir).EnumerateFiles("*", SearchOption.AllDirectories).ToList();
             //コピー先の新ファイル名リスト（srcFileListをlinqでリネーム）
             List<string> destFileList = srcFileList.ConvertAll( x => x.FullName.Replace(srcRootDir,destRootDir)).ToList();
@@ -34,10 +45,17 @@ namespace XX
             
             //ソース元ファイルの合計サイズ
             int srcFilesSize = secFileList.Sum(x => x.Length);
-            //コピー先ドライブの空き容量
-            int destDriveFreeSize = 0;
+            //バックアップ先ドライブの空き容量
+            int destDriveFreeSize = new DriveInfo(destRootDir.Split('\')[0].Replace(":","")).TotalFreeSpace;
+            //バックアップ先のドライブの空き容量とコピーするファイル容量を比較
+            //不足していたらfalseを返す
+            if(srcFileSize >= destDriveFreeSize)
+            {
+                Error = error + $"バクアップ先のドライブの空き容量が不足しています。\r\n";
+                return false;
+            }
             
-            //コピー先へディレクトリ作成
+            //バックアップ先ルートフォルダに子フォルダを作成
             foreach(string dir in destDirList)
             {
                 try
@@ -49,9 +67,13 @@ namespace XX
                 }
                 catch(Exception ex)
                 {
+                    Error = error + $"バックアップ先にフォルダ:{dir}を作成できませんでした。\r\n{ex.ToString()}\r\n";
                     return false;
                 }
             }
+            //ファイルをコピー
+                                                                    
+                                                                    
             return true;
         }
     }
