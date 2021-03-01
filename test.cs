@@ -54,7 +54,7 @@ namespace MovieDataBase
             }
             if(res == null || res.Count == 0)
             {
-                ViewingData = null;
+                ViewingData = new List<Dictionary<string,string>>();
                 labeldGVStatus.Text += $"【0件】";
             }
             else
