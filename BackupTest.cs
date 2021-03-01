@@ -23,7 +23,8 @@ namespace XX
             }
             
             //ソース元フォルダのファイル一覧取得（FileInfo）
-            IEnumerable<FileInfo> srcFileList = new DirectoryInfo(srcRootDir).EnumerateFiles("*", SearchOption.AllDirectories);
+            List<FileInfo> srcFileList = new DirectoryInfo(srcRootDir).EnumerateFiles("*", SearchOption.AllDirectories).ToList();
+            List<string> destFileList = srcFileList.ConvertAll( x => x.FullName.Replace(srcRootDir,destRootDir)).ToList();
             int srcFilesSize = secFileList.Sum(x => x.Length);
             
             return true;
