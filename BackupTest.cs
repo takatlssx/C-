@@ -11,6 +11,9 @@ namespace XX
         string srcRootDir;
         string destRootDir;
         
+        int oldBackupMaxCount = 10;
+        
+        
         public Backup(string name,string srcRootDir,string destRootDir)
         {
             this.name = name;
@@ -38,13 +41,11 @@ namespace XX
             
             //ソース元フォルダのファイルインフォ一覧取得
             List<FileInfo> srcFileList = new DirectoryInfo(srcRootDir).EnumerateFiles("*", SearchOption.AllDirectories).ToList();
-            //コピー先の新ファイル名リスト（srcFileListをlinqでリネーム）
-            List<string> destFileList = srcFileList.ConvertAll( x => x.FullName.Replace(srcRootDir,destRootDir)).ToList();
             //コピー先に作るフォルダ名一覧
-            List<string> destDirList = destFileList.Select(x => Path.GetDirectoryName(x)).Distinct().ToList();
+            List<string> destDirList = srcFileList.Select(x => x.DirectoryName.Replace(srcRootDir,destRootDir)).Distinct().ToList();
             
             //ソース元ファイルの合計サイズ
-            int srcFilesSize = secFileList.Sum(x => x.Length);
+            int srcFilesSize = srcFileList.Sum(x => x.Length);
             //バックアップ先ドライブの空き容量
             int destDriveFreeSize = new DriveInfo(destRootDir.Split('\')[0].Replace(":","")).TotalFreeSpace;
             //バックアップ先のドライブの空き容量とコピーするファイル容量を比較
@@ -72,6 +73,18 @@ namespace XX
                 }
             }
             //ファイルをコピー
+            foreach(string fl in srcFileList)
+            {
+                try
+                {
+                    File.Copy(fl,fl.Replace(srcRootDir,destRootDir));
+                }
+                catch(Exception ex)
+                {
+                    Error = error + $"ファイル:{fl}をコピーできませんでした。\r\n{ex.ToString()}\r\n";
+                    return false;
+                }
+            }
                                                                     
                                                                     
             return true;
