@@ -42,33 +42,25 @@ namespace MovieDataBase
            
         }
         
-        public void SetData(string dataFlg = "all",string sortOrder = "asc")
+        public void SetSelectedData(string sortOrder = "asc")
         {
-            SystemStatusText = "データベース表示";
-            if(dataFlg == "all")
+            SystemStatusLabel.Text = "データベース表示";
+            labeldGVStatus.Text = $"【検索結果】";
+            var res = DC.MainTable.Search(serchIdList,searchWordList,searchOperandList,searchCombination);                
+            
+            for(int i = 0 ; i < searchIdList.Count ; i++)
             {
-                ViewingData = DC.MainTable.Data;
-                ViewingStatusText = $"全件表示【{ViewingData.Count}件】";
+                labeldGVStatus.Text += $"条件{i} : 列'{DC.MainTable.Alias[searchIdList[i]]}' {searchOperandList[i]} '{searchWordList[i]}' "
             }
-            else //"search"
+            if(res == null || res.Count == 0)
             {
-                var res = DC.MainTable.Search(serchIdList,searchWordList,searchOperandList,searchCombination);
-                
-                ViewingStatusText = $"【検索結果】";
-                for(int i = 0 ; i < searchIdList.Count ; i++)
-                {
-                    ViewingStatusText += $"条件{i} : 列'{DC.Alias[searchIdList[i]]}' {searchOperandList[i]} '{searchWordList[i]}' "
-                }
-                if(res == null || res.Count == 0)
-                {
-                    ViewingData = null;
-                    ViewingStatusText += $"【0件】";
-                }
-                else
-                {
-                    ViewingData = res;
-                    ViewingStatusText += $"【{res.Count}件】";
-                }
+                ViewingData = null;
+                labeldGVStatus.Text += $"【0件】";
+            }
+            else
+            {
+                ViewingData = res;
+                labeldGVStatus.Text += $"【{res.Count}件】";
             }
             
             //dGV描画
@@ -85,51 +77,33 @@ namespace MovieDataBase
             listSeries.Items.Clear();
             listSeries.Items.Add("全て");
             
-            if(ViewingData == null || dataFlg == "all")
+            foreach(var dt in ViewingData)
             {
-                listTag.Items.Add(new string[]{ "全て" }.Concat(DC.Tables["tag"].Data.Select( x => x["tag"])).ToArray());
-                listSeries.Items.Add(new string[]{ "全て" }.Concat(DC.Tables["series"].Data.Select( x => x["series"])).ToArray());
-            }
-            else
-            {
-                foreach(var dt in ViewingData)
+                string [] buff = dt["tag"].Split('/');
+                foreach(string bf in buff)
                 {
-                    string [] buff = dt["tag"].Split('/');
-                    int listTagSelectedIndex = 0;
-                    int addCnt = 0;
-                    foreach(string bf in buff)
+                    if(bf != "" && !listTag.Items.Contains(bf))
                     {
-                        if(bf != "" && !listTag.Items.Contains(bf))
-                        {
-                            listTag.Items.Add(bf);
-                            addCnt++;
-                            
-                            if(searchIdList.Contains("tag") && wordList[searchIdList.IndexOf("tag")] == bf)
-                            {
-                                listTagSelectedIndex = addCnt;
-                            }
-                        }
+                        listTag.Items.Add(bf);
                     }
-                    
-                    buff = dt["series"].Split('/');
-                    int listSeriesSelectedIndex = 0;
-                    int addCntSeries = 0;
-                    foreach(string bf in buff)
-                    {
-                        if(bf != "" && !listSeries.Items.Contains(bf))
-                        {
-                            listSeries.Items.Add(bf);
-                            addCntSeries++;
-                            
-                            if(searchIdList.Contains("series") && wordList[searchIdList.IndexOf("series")] == bf)
-                            {
-                                listSeriesSelectedIndex = addCnt;
-                            }
-                        }
-                    }                    
                 }
-                listTag.SetSelect(listTagSelectedIndex,true);
-                listSeries.SetSelect(listSeriesSelectedIndex,true);
+                    
+                buff = dt["series"].Split('/');
+                foreach(string bf in buff)
+                {
+                    if(bf != "" && !listSeries.Items.Contains(bf))
+                    {
+                        listSeries.Items.Add(bf);
+                    }
+                }                    
+            }
+            if(searchIdList.Contains("tag") && listTag.Items.Contains(searchWordList[searchIdList.IndexOf("tag")]))
+            {
+                listTag.SetSelect(listTag.Items.FindIndex( x => x == searchWordList[searchIdList.IndexOf("tag")]),true);
+            }
+            if(searchIdList.Contains("series") && listSeries.Items.Contains(searchWordList[searchIdList.IndexOf("series")]))
+            {
+                listSeries.SetSelect(listTSeries.Items.FindIndex( x => x == searchWordList[searchIdList.IndexOf("series")]),true);
             }
             
         }
