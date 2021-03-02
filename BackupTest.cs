@@ -117,8 +117,25 @@ namespace XX
                 }
             }
             
+            //旧ファイル移動
+            
             SetTextInvoker("SystemStatusLabel","ファイルをコピーしています。。。。");
+            SetProgressInvoker("",0);
             //ファイルのコピー
+            for(int i = 0 ; i < srcFileList.Count ; i++)
+            {
+                try
+                {
+                    File.Copy(srcFileList[i].FullName,srcFileList[i].FullName.Replace(srcRootDir,destRootDir));                    
+                }
+                catch(Exception ex)
+                {
+                    Error = error + $"ファイル:{srcFileList[i].FullName}をコピーできませんでした。\r\n{ex.ToString()}\r\n";
+                    return false;
+                }
+                int pV = (i*100)/srcFileList.Count-1;
+                SetProgressInvoker("",pV);
+            }
         }
         
         
