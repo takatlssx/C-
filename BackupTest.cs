@@ -27,7 +27,7 @@ namespace XX
             
             //バックアップ元・バックアップ先ルートフォルダパスチェック
             
-            //バックアップ元のファイルインフォ一覧取得
+            //バックアップ元のファイルインフォ一覧
             var srcFileList = new DirectoryInfo(srcRootDir).EnumerateFiles("*", SearchOption.AllDirectories).ToList();
             //バックアップ先に作るフォルダ名一覧
             var destDirList = Directory.EnumerateDirectories(srcRootDir, "*", SearchOption.AllDirectories).Select(x => x.Replace(srcRootDir,destRootDir)).ToList();
@@ -35,14 +35,40 @@ namespace XX
             //バックアップ先のファイルインフォ一覧
             var destFileList = new DirectoryInfo(destRootDir).EnumerateFiles("*", SearchOption.AllDirectories).ToList();
             
-            //バックアップ元にあってバックアップ先に無いファイル（新規ファイル）のリスト
+            //バックアップするファイルのリスト
             List<FileInfo> newFileList = new List<FileInfo>();
-            //
+            
+            //バックアップ先にあってバックアップ元に無い・
+            //バックアップ元と更新日時が異なるファイル名（旧ファイル）リスト
+            List<string> oldFileList = new List<string>();
+            
+            //バックアップ元にあってバックアップ先に無いファイル（新規ファイル)
+            //バックアップ元・バックアップ先の同名ファイルで更新日時が違うファイル（更新ファイル）
+            //以上をnewFileListに追加
             foreach(FileInfo fI in srcFileList)
             {
-                if(fI.FullName.Replace(srcRootDir,destRootDir))
+                //新規ファイル
+                if(!File.Exists(fI.FullName.Replace(srcRootDir,destRootDir)))
                 {
+                    newFileList.Add(fI);
                 }
+                else
+                {
+                    if(fI.LastWriteTime != File.GetLastWriteTime(fI.FullName.Replace(srcRootDir,destRootDir)))
+                    {
+                        newFileList.Add(fI);
+                        //更新日時が違うバックアップ先ファイルをoldFileListへ追加
+                        oldFileList.Add(fI.FullName.Replace(srcRootDir,destRootDir));
+                    }
+                }
+            }
+            
+            //バックアップ先にあってバックアップ元に無いファイルをoldFileListに追加
+            //但しバックアップ先のoldfileフォルダにあるファイルは除外
+            oldFileList.AddRange(destFileList.Where(x => !File.Exists(x.FullName.replace(destRootDir,srcRootDir)) && !x.FullName.Contains(destRootDir+"\\oldfile")).ToList());
+            
+            //フォルダのコピー
+            for(){
             }
         }
         
