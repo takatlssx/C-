@@ -18,6 +18,11 @@ namespace MovieDataBase
         public List<string> searchOperandList = new List<string>();
         public string searchCombination = "or";
         
+        public void ripmove()
+        {
+            var lst = Directory.EnumerateFiles("G:\\リッピング", "*", SearchOption.AllDirectories);
+        }
+        
         public void SetAllData(sortOrder = "asc")
         {
             SystemStatusLabel.Text = "データベース表示";
