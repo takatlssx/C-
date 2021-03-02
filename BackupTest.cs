@@ -21,6 +21,32 @@ namespace XX
             this.destRootDir = destRootDir;
         }
         
+        public bool BackupSync()
+        {
+            string error = $"バックアップエラー:Backup.BackupSync()\r\n";
+            
+            //バックアップ元・バックアップ先ルートフォルダパスチェック
+            
+            //バックアップ元のファイルインフォ一覧取得
+            var srcFileList = new DirectoryInfo(srcRootDir).EnumerateFiles("*", SearchOption.AllDirectories).ToList();
+            //バックアップ先に作るフォルダ名一覧
+            var destDirList = Directory.EnumerateDirectories(srcRootDir, "*", SearchOption.AllDirectories).Select(x => x.Replace(srcRootDir,destRootDir)).ToList();
+            
+            //バックアップ先のファイルインフォ一覧
+            var destFileList = new DirectoryInfo(destRootDir).EnumerateFiles("*", SearchOption.AllDirectories).ToList();
+            
+            //バックアップ元にあってバックアップ先に無いファイル（新規ファイル）のリスト
+            List<FileInfo> newFileList = new List<FileInfo>();
+            //
+            foreach(FileInfo fI in srcFileList)
+            {
+                if(fI.FullName.Replace(srcRootDir,destRootDir))
+                {
+                }
+            }
+        }
+        
+        
         public bool BackupAll()
         {
             string error = $"バックアップエラー:Backup.BackupAll()\r\n";
