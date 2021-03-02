@@ -101,8 +101,24 @@ namespace XX
             
             SetTextInvoker("SystemStatusLabel","フォルダ構造をコピーしています。。。。");
             //フォルダのコピー
-            for(){
+            foreach(string dir in destDirList)
+            {
+                if(!Directory.Exists(dir))
+                {
+                    try
+                    {                       
+                        Directory.CreateDirectory(dir);
+                    }
+                    catch(Exception ex)
+                    {
+                        Error = error + $"フォルダ:{dir}が作成できませんでした。\r\n{ex.ToString()}\r\n";
+                        return false;
+                    }
+                }
             }
+            
+            SetTextInvoker("SystemStatusLabel","ファイルをコピーしています。。。。");
+            //ファイルのコピー
         }
         
         
