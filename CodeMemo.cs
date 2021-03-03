@@ -44,14 +44,46 @@ public List<Dictionary<string,string>> Search(List<string> idList,List<string> w
 }
 
 public void moveRip(){
+      
       //ripフォルダのファイル一覧取得
       var fileList = "";
       
       foreach(string fl in fileList)
       {
+            //ファイル名を_で分割
+            //ファイル名はcategory_tag_series_number_title.拡張子の規則
+            //buuf[0]=category,[1]=tag,[2]=series,[3]=number,[4]=title.拡張子
             string[] buff = Path.GetFileNameWithoutExtention(fl).Split('-');
+            
+            //移動先のファイルパス形成
+            string newFilePath = "G:\\Movie\\"+category+"\\";
+            if(buff[2] != "")
+            {
+                  newFilePath += buff[2] + "\\"
+            }
+            //上記のフォルダパスが存在しなければ作成
+            if(!Directory.Exists(newFilePath))
+            {
+                  Directory.CreateDirectory(newFilePath);
+            }
+            newFilePath += Path.GetFileName(fl);
+            
+            //ファイルコピー
+            File.Copy(fl,newFilePath);
+            
+            //Indexの個数分の空白の文字の配列を作成
             string[] vals = Enumerable.Repeat<string>("", Index.Count).ToArray();
+            //Indexと上記空白配列をZip→ToDictionaryで新規データ辞書作成
             var newData = Index.Zip(vals,(k,v) => new {k,v}).ToDictionary(a => a.k, a => a.v);
+            
+            newData["title"] = buff[4];
+            newData["subtitle"] = buff[4];
+            newData["number"] = int.Parse(buff[3]).ToString("0000");
+            newData["category"] = buff[0];
+            newData["tag"] = buff[1];
+            newData["series"] = buff[2];
+            newData["file"] = newFilePath;
+            
       }
       
 }
