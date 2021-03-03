@@ -25,3 +25,20 @@ if(idList.Any(x => !Index.Contains[x] && x!="全て" && x!=""))
 {
       return false;
 }
+
+public List<Dictionary<string,string>> Search(List<string> idList,List<string> wordList,List<string> operandList,andOr = "or")
+{
+      //idListチェック
+      if(idList.Any(x => !Index.Contains[x] && x!="全て" && x!=""))
+      {
+            return false;
+      }
+      //idList、wordList、operandListの個数チェック
+      if(idList.Count != wordList.Count || idList.Count != operandList.Count)
+      {
+            return false;
+      }
+      //operandListに"="か"like"以外の文字が指定されていたら自動で"like"にする
+      operandList.Where(x => x!="=" && )
+
+}
