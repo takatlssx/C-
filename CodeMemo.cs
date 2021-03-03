@@ -17,3 +17,11 @@ var dd = DC.MainTable.Data.Where(x => x.Values.Any(y => y == "吉田類")).ToLis
 //すべての列対象で、吉田類を含むする列がある場合
 var ss = DC.MainTable.Search(new List<string> { ""},new List<string> {"吉田類" },new List<string> {"like" },"and");
 var dd = DC.MainTable.Data.Where(x => x.Values.Any(y => y.Contains("吉田類"))).ToList();
+
+//検索時のidListの値検証
+//idListに 1:Indexに含まれていない文字 且つ 2:"全て"でない　且つ　3:""でない
+//以上が「true」であれば不正なidが含まれている
+if(idList.Any(x => !Index.Contains[x] && x!="全て" && x!=""))
+{
+      return false;
+}
