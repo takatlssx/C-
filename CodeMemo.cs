@@ -26,6 +26,12 @@ if(idList.Any(x => !Index.Contains[x] && x!="全て" && x!=""))
       return false;
 }
 
+//フォームコントロールのチェックボックスを全て未チェックにする
+foreach (var c in Cntrols.Cast<Control>().Where(c => c is CheckBox))
+{
+    c.Checked = false;
+}
+
 public List<Dictionary<string,string>> Search(List<string> idList,List<string> wordList,List<string> operandList,andOr = "or")
 {
       //idListチェック
