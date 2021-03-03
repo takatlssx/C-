@@ -42,3 +42,16 @@ public List<Dictionary<string,string>> Search(List<string> idList,List<string> w
       operandList.Where(x => x!="=" && )
 
 }
+
+public void moveRip(){
+      //ripフォルダのファイル一覧取得
+      var fileList = "";
+      
+      foreach(string fl in fileList)
+      {
+            string[] buff = Path.GetFileNameWithoutExtention(fl).Split('-');
+            string[] vals = Enumerable.Repeat<string>("", Index.Count).ToArray();
+            var newData = Index.Zip(vals,(k,v) => new {k,v}).ToDictionary(a => a.k, a => a.v);
+      }
+      
+}
