@@ -149,6 +149,12 @@ namespace Movie
 
             //値が変更されているかチェック
             bool isOK = false;
+            
+            //if((this.Controls.Cast<Control>().Where(x => x is TextBox || x is ComboBox).Any(x => x.Text != defVals[x.Tag.ToString()])) == false)
+            //{
+            //    error = "変更されたデータ値はありませんでした。";
+            //    return false;
+            //}
             foreach (Control ctl in this.Controls)
             {
                 if (ctl.Tag != null && !(ctl is CheckBox) && defVals[ctl.Tag.ToString()] != ctl.Text)
