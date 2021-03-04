@@ -71,24 +71,10 @@ namespace Movie
 
             //コンボボックスの値設定
             comboCategory.Items.AddRange(ownerForm.DC.Tables["category"].Data.Select(x => x["category"]).ToArray());
-
-            foreach (var dict in ownerForm.DC.Tables["tag"].Data)
-            {
-                comboTag.Items.Add(dict["tag"]);
-            }
-            foreach (var dict in ownerForm.DC.Tables["series"].Data)
-            {
-                comboSeries.Items.Add(dict["series"]);
-            }
-            foreach (var dict in ownerForm.DC.Tables["actor"].Data)
-            {
-                comboActor.Items.Add(dict["actor"]);
-            }
-            foreach (var dict in ownerForm.DC.Tables["source"].Data)
-            {
-                comboSource.Items.Add(dict["source"]);
-            }
-
+            comboTag.Items.AddRange(ownerForm.DC.Tables["tag"].Data.Select(x => x["tag"]).ToArray());
+            comboSeries.Items.AddRange(ownerForm.DC.Tables["series"].Data.Select(x => x["series"]).ToArray());
+            comboActor.Items.AddRange(ownerForm.DC.Tables["actor"].Data.Select(x => x["actor"]).ToArray());
+            comboSource.Items.AddRange(ownerForm.DC.Tables["source"].Data.Select(x => x["source"]).ToArray());
         }
 
         #region チェックボックス処理
