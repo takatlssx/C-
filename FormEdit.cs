@@ -16,7 +16,7 @@ namespace Movie
         FormMain ownerForm;
         List<string> idList;
 
-        Dictionary<string, string> defVals = new Dictionary<string, string>();
+        Dictionary<string, string> defVals;
 
         string error = "";
 
@@ -25,6 +25,8 @@ namespace Movie
             InitializeComponent();
             ownerForm = owner;
             this.idList = idList;
+            //idListの一つ目のデータをデフォルト値に設定
+            defVals = new Dictionary<string,string>(ownerForm.DC.MainTable.Data[int.Parse(idList[0]) - 1]);
         }
 
         private void FormEdit_Load(object sender, EventArgs e)
@@ -32,21 +34,14 @@ namespace Movie
             //各列のデフォルト値を設定
             //データが1個ならそのデータ値
             //複数データなら、値が同じ場合その値、異なる値の場合は「複数の値」にする
-            for (int i = 0; i < idList.Count ; i++)
+            for (int i = 1; i < idList.Count ; i++)
             {
                 var dt = ownerForm.DC.MainTable.Data[int.Parse(idList[i]) - 1];
                 foreach (string ky in dt.Keys)
                 {
-                    if (i == 0)
+                    if (defVals[ky] != dt[ky])
                     {
-                        defVals[ky] = dt[ky];
-                    }
-                    else
-                    {
-                        if (defVals[ky] != dt[ky])
-                        {
-                            defVals[ky] = "複数の値";
-                        }
+                        defVals[ky] = "複数の値";
                     }
                 }
             }
