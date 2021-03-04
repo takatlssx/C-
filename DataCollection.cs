@@ -204,6 +204,10 @@ namespace Movie
             string error = "リレーショナルテーブル更新エラー:DataCollection.updateRelationalTable()\r\n";
 
             //もし新規データにリレーショナルデータベース名の列が含まれていなければ処理を抜ける
+           // if(!RelationalTableNames.Any(x => newData.Keys.Contains(x)))
+            //{
+            //    return true;
+            //}
             bool isContainRLTBL = false;
             foreach (string key in newData.Keys)
             {
