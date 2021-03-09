@@ -1,3 +1,13 @@
+public void DrawDGV(List<Dictionary<string,string>> data,List<string> viewIndex,string sortIndex,string sortOrder)
+{
+}
+
+//mode = "all" or "select"
+public void DrawListBox(List<Dictionary<string,string>> data,string mode = "all")
+{
+}
+
+
 //or検索
 List<T>1.Union(List<T>2);
 
