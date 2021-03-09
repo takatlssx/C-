@@ -1,3 +1,5 @@
+List<string> ViewIndex;
+var vals = data.Select(x => ViewIndex.Contains(x.Key)).ToList();
 public void DrawDGV(List<Dictionary<string,string>> data,List<string> viewIndex,string sortIndex,string sortOrder)
 {
 }
