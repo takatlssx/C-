@@ -1,4 +1,25 @@
+//
+public List<string> SearchIdList;
+public List<string> SearchWordList;
+public List<string> SearchOperandList;
+public string SearchAndOr;
 
+public void DrawStatusLabel(string mode = "all")
+{
+    if(mode == "all")
+    {
+        StatusLabel.Text = $"全件表示【{ViewingData.Count}件】";
+    }
+    else
+    {
+        StatusLabel.Text = $"【検索結果表示({SearchAndOr}検索)】";
+        for(int i = 0 ; i < SearchIdList.Count ; i++)
+        {
+            StatusLabel.Text += $"[条件{i+1}] 項目：'{SearchIdList[i]}' {SearchOperandList[i]} '{SearchWordList[i]}' ";
+        }
+        StatusLabel.Text += $"【{ViewingData.Count}件】";
+    }
+}
 
 //or検索
 List<T>1.Union(List<T>2);
