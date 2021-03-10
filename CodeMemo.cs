@@ -1,3 +1,46 @@
+List<Dictironary<string,string>> newDataList = new List<Dictironary<string,string>>();
+public button()
+{
+    string msg = "";
+    //ヴァりでーとする
+    
+    int counter = 1;
+    foreach(string file in checkedList.Items)
+    {
+        var dt = Enumeratable.repeat<string>("",ownerForm.DC.MainTable.Index.Count).ToList();
+        var dict = ownerForm.DC.MainTable.Index.Zip(dt,(ky,vl) => new {ky,vl}).ToDictionary(a => a.ky,b => b.vl);
+        dict["file"] = file;
+        //タイトル
+        dict["title"] = (textTitle.Text == "") ? Path.GetFileNameWithoutExtension(dct["file"]) : textTitle.Text + $"#{counter.ToString("0000")}";
+        //サブタイトル
+        dict["subtitle"] = (textSubTitle.Text == "") ? Path.GetFileNameWithoutExtension(dct["file"]) : textSubTitle.Text + $"#{counter.ToString("0000")}";        
+        //カテゴリ
+        dict["category"] = comboCategory.text;
+        //タグ
+        //シリーズ
+        //出演者
+        //配信元
+        //録画日
+        //評価
+        //備考
+        
+        //登録
+        if(!ownerForm.DC.RegistData(dict))
+        {
+            MessageBox.Show(ownerForm.DC.Error,"登録エラー");
+            return;
+        }
+        
+        msg += ownerForm.DC.Msg;
+        counter++;
+    }
+    
+    MessageBox.Show(msg,"登録完了!");
+    return;
+}
+
+
+
 //
 public List<string> SearchIdList;
 public List<string> SearchWordList;
