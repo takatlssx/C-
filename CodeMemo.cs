@@ -1,35 +1,3 @@
-List<string> ViewIndex;
-var vals = data.Select(x => ViewIndex.Contains(x.Key)).ToList();
-public void DrawDGV(List<Dictionary<string,string>> data,List<string> viewIndex,string sortIndex,string sortOrder)
-{
-}
-
-//mode = "all" or "select"
-public void DrawListBox(List<Dictionary<string,string>> data,Dictionary<string,List<string>> searchConditions = null)
-{
-      IsChangingListBoxFromMethod = true;
-      listCategory.Items.Clear();
-      listCategory.Items.Add("全て");
-      listCategory.Items.AddRange(DC.Tables["category"].Select(x => x["category"]).ToArray());
-      listTag.Items.Clear();
-      listTag.Items.Add("全て");
-      listTag.Items.AddRange(data.Where(x => x["tag"]!="").Select(x => x["tag"]).Distinct().ToArray());
-      listSeries.Items.Clear();
-      listSeries.Items.Add("全て");
-      listSeries.Items.AddRange(data.Where(x => x["series"]!="").Select(x => x["series"]).Distinct().ToArray());
-      listActor.Items.Clear();
-      listActor.Items.Add("全て");
-      listActor.Items.AddRange(data.Where(x => x["actor"]!="").Select(x => x["actor"]).Distinct().ToArray());
-      
-      if(searchConditions != null)
-      {
-          if(searchConditions["id"].Contains("category"))
-          {
-              int ic = searchConditions["id"].IndexOf();
-          }
-      }
-                                                                               
-}
 
 
 //or検索
