@@ -7,6 +7,35 @@ using System.IO;
 
 namespace MovieDataBase
 {
+    
+    public void ListBoxValueChanged(string listBoxName){
+        //データを表示
+        if(listCategory.SelectedIndex > 0)
+        {
+            idList.Add("category");
+            wordList.Add(listCategory.Text);
+            operandList.Add("=");            
+        }
+        .....
+            
+        ViewingData = DC.MainTable.Search(idList,wordList,operandList,"and");
+        DrawDGV(ViewingData,"asc");
+        
+        //リストボック
+        if(listBoxName == "tag")
+        {
+            listSeries.Items.Clear();
+            listSeries.Items.Add("全て");
+            listSeries.Items.AddRange(ViewingData.Select(x => x["series"]).Distinct().Where(x => x != ""));
+            listActor.Items.Clear();
+            listActor.Items.Add("全て");
+            listActor.Items.AddRange(ViewingData.Select(x => x["actor"]).Distinct().Where(x => x != ""));
+        }
+        
+    }
+    
+    
+    
     public class DataCollection
     {
         public List<Dictionari<string,string>> ViewingData;
