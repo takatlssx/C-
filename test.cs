@@ -1,3 +1,61 @@
+public void ListBoxItemChanged(string lbxName)
+{    
+    Dictionary<string,ListBox> listBoxDict = new Dictionary<string,ListBox>();
+    listBoxDict["category"] = listCategory;
+    listBoxDict["tag"] = listTag;
+    listBoxDict["series"] = listSeries;
+    listBoxDict["actor"] = listActor;
+    
+    //選択位置が-1なら終了
+    if(listBoxDict[lbxName].SelectedId == -1)
+    {
+        return;
+    }   
+    
+    //カテゴリリストボックスの選択が全てであったら全件表示。
+    if(listBoxDict[lbxName].SelectedId == 0 && lbxName == "category")
+    {
+        ViewAllData();
+        return;
+    }
+    
+    SearchIdList = new List<string>();
+    SearchWordList = new List<string>();
+    SearchOperandList = new List<string>();
+    
+    foreach(string ky in listBoxDict.Keys)
+    {
+        if(listBoxDict[ky].SelectedId > 0)
+        {
+            SearchIdList.Add(ky);
+            SearchWordList.Add(listBoxDict[ky].Text);
+            SearchOperandList.Add("=");
+        }
+    }
+    
+    //リストボックス全てがインデックス０＝「全て」だったら
+    //すれてのデータ表示
+    if(SearchIdList.Count == 0)
+    {
+        ViewAllData();
+        return;
+    }
+    else
+    {
+        ViewingData = DC.MainTable.Search(SearchIdList,SearchWordList,SearchOperandList,"and");
+        DrawDGV();
+        DrawDGVStatus("search");        
+    }
+}
+
+public void DrawListBox(string pointListBox)
+{
+    if(pointListBox == "all")
+    {
+    }
+}
+
+
 using System;
 using System.Collections.Generic;
 using System.Linq;
