@@ -44,7 +44,8 @@ public void ListBoxItemChanged(string lbxName)
     {
         ViewingData = DC.MainTable.Search(SearchIdList,SearchWordList,SearchOperandList,"and");
         DrawDGV();
-        DrawDGVStatus("search");        
+        DrawDGVStatus("search");
+        DrawListBox(lbxName);
     }
 }
 
@@ -52,6 +53,51 @@ public void DrawListBox(string pointListBox)
 {
     if(pointListBox == "all")
     {
+        listCategory.Items.Clear();
+        listTag.Items.Clear();
+        listSeries.Items.Clear();
+        listActor.Items.Clear();
+        
+        listCatgeory.Add("全て");
+        listTag.Add("全て");
+        listSeries.Add("全て");
+        listActor.Add("全て");
+        
+        listTag.AddRange(DC.Tables["category"].Select(x => x["category"]).ToArray());
+        listTag.AddRange(ViewingData.Where(x => x["tag"] != "").Select(x => x["tag"]).Distinct().ToArray());
+        listSeries.AddRange(ViewingData.Where(x => x["series"] != "").Select(x => x["series"]).Distinct().ToArray());
+        listActor.AddRange(ViewingData.Where(x => x["actor"] != "").Select(x => x["actor"]).Distinct().ToArray());
+    }
+    else if(pointListBox == "category")
+    {
+        listTag.Items.Clear();
+        listSeries.Items.Clear();
+        listActor.Items.Clear();
+        
+        listTag.Add("全て");
+        listSeries.Add("全て");
+        listActor.Add("全て");
+        
+        listTag.AddRange(ViewingData.Where(x => x["tag"] != "").Select(x => x["tag"]).Distinct().ToArray());
+        listSeries.AddRange(ViewingData.Where(x => x["series"] != "").Select(x => x["series"]).Distinct().ToArray());
+        listActor.AddRange(ViewingData.Where(x => x["actor"] != "").Select(x => x["actor"]).Distinct().ToArray());        
+    }
+    else if(pointListBox == "tag")
+    {
+        listSeries.Items.Clear();
+        listActor.Items.Clear();
+        
+        listSeries.Add("全て");
+        listActor.Add("全て");
+        
+        listSeries.AddRange(ViewingData.Where(x => x["series"] != "").Select(x => x["series"]).Distinct().ToArray());
+        listActor.AddRange(ViewingData.Where(x => x["actor"] != "").Select(x => x["actor"]).Distinct().ToArray());        
+    }
+    else if(pointListBox == "series")
+    {
+        listActor.Items.Clear();        
+        listActor.Add("全て");        
+        listActor.AddRange(ViewingData.Where(x => x["actor"] != "").Select(x => x["actor"]).Distinct().ToArray());        
     }
 }
 
