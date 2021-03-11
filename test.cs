@@ -1,3 +1,17 @@
+public void ViewSelectedData()
+{
+    if(SearhIdList == null || SearchIdList.Count == 0)
+    {
+        ViewAllData();
+        return;
+    }
+    
+    ViewingData = DC.MainTable.Search(SearchIdList,SearchWordList,SearchOperandList,SearchAndOr);
+    DrawDGV();
+    DrawDGVStatus("search");
+    DrawListBox("all");
+}
+
 public void ListBoxItemChanged(string lbxName)
 {    
     Dictionary<string,ListBox> listBoxDict = new Dictionary<string,ListBox>();
@@ -42,10 +56,8 @@ public void ListBoxItemChanged(string lbxName)
     }
     else
     {
-        ViewingData = DC.MainTable.Search(SearchIdList,SearchWordList,SearchOperandList,"and");
-        DrawDGV();
-        DrawDGVStatus("search");
-        DrawListBox(lbxName);
+        ViewSelectedData();
+        return;
     }
 }
 
