@@ -21,11 +21,24 @@ public void DrawLabelDGVStatus()
     {
         labelDGVStatus.Text = $"全件表示【{ViewingData.Count}件】";
     }
-    else{
+    else
+    {
     }
 }
 
 //リストボックス描画
-public void DrawListBox()
+public void DrawListBox(string startingPointListBoxName = "all")
 {
+    if(startingPointListBoxName == "all")
+    {
+    }
+    else if(startingPointListBoxName == "category")
+    {
+    }
+    else if(startingPointListBoxName == "tag")
+    {
+    }
+    else if(startingPointListBoxName == "series")
+    {
+    }    
 }
