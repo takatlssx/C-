@@ -1,3 +1,39 @@
+public List<DIctionary<string,string>> search()
+{
+    List<DIctionary<string,string>> result = new List<DIctionary<string,string>>();
+    
+    for(int i = 0; i < idList.Count ; i++)
+    {
+        List<DIctionary<string,string>> perConditionResult = new List<DIctionary<string,string>>(); 
+        if(idList[i] == "" && operandList[i] == "=")
+        {
+            perConditionResult = Data.Where(x => x.Values.Contains(wordList[i])).ToList();
+        }
+        else if(idList[i] == "" && operandList[i] == "like")
+        {
+            perConditionResult = Data.Where(x => x.Values.Where(y => y.Contains(wordList[i]))).ToList();
+        }
+        else if(idList[i] != "" && operandList[i] == "=")
+        {
+            perConditionResult = Data.Where(x => x[idList[i]] == wordList[i]).ToList();
+        }
+        else if(idList[i] != "" && operandList[i] == "like")
+        {
+            perConditionResult = Data.Where(x => x[idList[i]].Contains(wordList[i])).ToList();
+        }
+        
+        if(andOr == "or")
+        {
+            result.Union(perConditionResult);
+        }
+        else
+        {
+            result.Intersect(perConditionResult);
+        }
+        
+    }
+}
+
 List<Dictironary<string,string>> newDataList = new List<Dictironary<string,string>>();
 public button()
 {
