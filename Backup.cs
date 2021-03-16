@@ -33,5 +33,11 @@ foreach(string file in srcFileList)
 var destFileList = Directory.GetFiles(destRootDir,"*",SearchOption.AllDirectories).Where(x => !x.Contains("Z:\\Movie\\oldfile")).ToList();
 oldFileList.AddRange(destFileList.Where(x => !File.Exists(x.Replace(destRootDir,srcRootDir))).ToArray());
 
-//６：バックアップするファイルの容量とバックアップ先のドライブ空き容量を比較し
-//    足りなければ処理を中段
+//バックアップするファイルの容量とバックアップ先のドライブ空き容量を比較し
+//足りなければ処理を終了
+long fileSize = srcFileList...;
+long destFreeSize = dest.....;
+if(fileSize >= destFreeSize)
+{
+    return false;
+}
