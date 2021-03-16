@@ -1,19 +1,20 @@
-//１：バックアップ元のルートフォルダのファイル一覧を取得する
-var srcFileList = Directory.GetFiles(srcRootDir,"*",SearchOption.AllDirectories);
+//１：バックアップ元のファイル一覧リスト
+List<string> srcFileList = Directory.GetFiles(srcRootDir,"*",SearchOption.AllDirectories).ToList();
+//２：新しいファイル・更新日時が違うファイルのリスト
+List<string> newFileList = new List<string>();
+//３：newFileListの中で、バックアップ先に無いフォルダリスト
+List<string> newDirList = new List<string>();
+//４：バックアップ先の中で、バックアップ元に無いファイル・更新日時が違うファイルのリスト
+List<string> oldFileList = new List<string>();
 
-long secFileSize = srcFileList.Select(x => new FileInfo(x).Length).ToList.Sum();
-//２：バックアップ先のルートフォルダのファイル一覧を取得する
-var destFileLIst = Directory.GetFiles(destRootDir,"*",SearchOption.AllDirectories);
-//３：バックアップ元にあってバックアップ先に無いファイル、あっても更新日時が違うファイルを取得する
-//   そこから新しいフォルダ一覧も取得する
-var newFileList;
-var oldFileList;
-var newDirList;
+//ファイルを比較し上記各リストに追加
 foreach(string file in srcFileList)
 {
+    //もしバックアップ先にファイルが無ければ、newFileListに追加    
     if(!File.Exists(file.Replace(srcRootDir,destRootDir)))
     {
         newFileList.Add(file);
+        //そのファイルのフォルダがバックアップ先に無ければnewDirListに追加
         if(!Directory.Exists(Path.GetDirectoryName(file.Replace(srcRootDir,destRootDir))))
         {
             newDirList.Add(Path.GetDirectoryName(file.Replace(srcRootDir,destRootDir)));
@@ -21,12 +22,16 @@ foreach(string file in srcFileList)
     }
     else if(File.GetLastWriteTime(file) != File.GetLastWriteTime(file.Replace(srcRootDir,destRootDir)))
     {
+        //もし更新日時が違っていればnewFileListに追加
         newFileList.Add(file);
+        //バックアップ先のファイルはoldFileListに追加
         oldFileList.Add(file.Replace(srcRootDir,destRootDir));
     }
 }
 
+//バックアップ先にあって、バックアップ元に無いファイルをoldFileListに追加
+var destFileList = Directory.GetFiles(destRootDir,"*",SearchOption.AllDirectories).Where(x => !x.Contains("Z:\\Movie\\oldfile")).ToList();
+oldFileList.AddRange(destFileList.Where(x => !File.Exists(x.Replace(destRootDir,srcRootDir))).ToArray());
 
-//５：バックアップ先にあってバックアップ元に無いファイル（古いファイル）一覧を取得する。
 //６：バックアップするファイルの容量とバックアップ先のドライブ空き容量を比較し
 //    足りなければ処理を中段
