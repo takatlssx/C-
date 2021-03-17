@@ -20,11 +20,12 @@ foreach(string file in srcFileList)
             newDirList.Add(Path.GetDirectoryName(file.Replace(srcRootDir,destRootDir)));
         }
     }
+    //もし同名のファイルがあったら更新日時を比較
     else if(File.GetLastWriteTime(file) != File.GetLastWriteTime(file.Replace(srcRootDir,destRootDir)))
     {
         //もし更新日時が違っていればnewFileListに追加
         newFileList.Add(file);
-        //バックアップ先のファイルはoldFileListに追加
+        //更新日時の違うバックアップ先のファイルはoldFileListに追加
         oldFileList.Add(file.Replace(srcRootDir,destRootDir));
     }
 }
@@ -40,4 +41,63 @@ long destFreeSize = dest.....;
 if(fileSize >= destFreeSize)
 {
     return false;
+}
+
+//oldFileListのファイルをバックアップ先の「oldfile」フォルダに移動
+if(oldFileList.Count != 0)
+{
+    //バックアップ先のルートフォルダ直下に「oldfile」フォルダが有るか確認
+    //なければ作成
+    if(!Directory.Exists(destRootDir+"\\oldfile"))
+    {
+        try
+        {
+            Directory.CreateDirectory(destRootDir+"\\oldfile");
+        }
+        catch(Exception ex)
+        {
+            Msg += $"旧ファイルを保存するフォルダ:{destRootDir+"\\oldfile"}\r\nの作成に失敗しました。\r\n{ex.ToString()}\r\n";
+        }
+    }
+    foreach(string file in oldFileList)
+    {
+        try
+        {
+            File.Move(file,destRootDir+"\\oldfile\\"+Path.GetFileName(file));
+        }
+        catch(Exception ex)
+        {
+            Msg += $"旧ファイル:{file}\r\nをoldfileフォルダに移動できませんでした。\r\nこのファイルはバックアップ時上書きされる可能性が有ります。\r\n{ex.ToString()}\r\n";
+        }
+    }
+}
+
+//newDirListを作成(あれば)
+if(newDirList.Count != 0)
+{
+    foreach(string dir in newDirList)
+    {
+        try
+        {
+            Directory.CreateDirectory(dir.Replace(srcRootDir,destRootDir));
+        }
+        catch(Exception ex)
+        {
+            Error = error + $"ディレクトリ:{dir}\r\nの作成に失敗しました。\r\n{ex.ToString()}\r\n";
+            return false;
+        }
+    }
+}
+
+//ファイルのコピー
+for(int i = 0 ; i < newFileList ; i++)
+{
+    try
+    {
+        File.Copy(newFileList[i],newFileList[i].Replace(srcRootDir,destRootDir));
+    }
+    catch(Exception ex)
+    {
+        Msg += $"ファイル:{newFileList[i]}\r\nをバックアップできませんでした。\r\n{ex.ToString()}\r\n";
+    }
 }
