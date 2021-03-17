@@ -89,6 +89,8 @@ if(newDirList.Count != 0)
     }
 }
 
+string copyStatusStr = "";
+int failCount = 0;
 //ファイルのコピー
 for(int i = 0 ; i < newFileList ; i++)
 {
@@ -99,5 +101,10 @@ for(int i = 0 ; i < newFileList ; i++)
     catch(Exception ex)
     {
         Msg += $"ファイル:{newFileList[i]}\r\nをバックアップできませんでした。\r\n{ex.ToString()}\r\n";
+        failCount++;
     }
 }
+
+int successCount = newFileList.Count - failCount;
+copyStatusStr = $"{successCount}個のファイルのバックアップに成功しました。\r\n";
+if(failCount > 0){copyStatusStr += $"{failCount}個のファイルのバックアップに失敗しました。\r\n";}
