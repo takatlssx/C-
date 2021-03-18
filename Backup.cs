@@ -1,3 +1,12 @@
+private void getInfo()
+{
+    using(StreamReader sr = new StreamReader("P:\\D#\\BackupManager\\app.info"))
+    {
+    }
+}
+
+
+
 //１：バックアップ元のファイル一覧リスト
 List<string> srcFileList = Directory.GetFiles(srcRootDir,"*",SearchOption.AllDirectories).ToList();
 //２：新しいファイル・更新日時が違うファイルのリスト
